@@ -9,13 +9,6 @@ slidenumbers: true
 
 ---
 
-# [fit] Day 01
-# [fit] Session 02
-![](../../Common/images/cf_logo.png)
-
-
----
-
 ![left](../../Common/images/mattmug.jpeg)
 # Me
 
@@ -24,5 +17,18 @@ Senior Product Manager
 Pivotal
 [http://www.mattstine.com](http://www.mattstine.com)
 [matt.stine@gmail.com](mailto:matt.stine@gmail.com)
+
+---
+
+# [fit] Day 01
+# [fit] Session 02
+![](../../Common/images/cf_logo.png)
+
+---
+
+# [fit] Running
+# [fit] Twelve-Factor
+# [fit] Apps
+# [fit] with Cloud Foundry
 
 ---

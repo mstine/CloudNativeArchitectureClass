@@ -9,13 +9,6 @@ slidenumbers: true
 
 ---
 
-# [fit] Day 01
-# [fit] Session 01
-![](../../Common/images/cf_logo.png)
-
-
----
-
 ![left](../../Common/images/mattmug.jpeg)
 # Me
 
@@ -24,5 +17,32 @@ Senior Product Manager
 Pivotal
 [http://www.mattstine.com](http://www.mattstine.com)
 [matt.stine@gmail.com](mailto:matt.stine@gmail.com)
+
+---
+
+# [fit] Day 01
+# [fit] Session 01
+![](../../Common/images/cf_logo.png)
+
+---
+
+# [fit] What?
+# [fit] Why?
+# [fit] How?
+
+---
+
+TODO
+
+---
+
+# [fit] Building
+# [fit] Twelve-Factor
+# [fit] Apps
+# [fit] with Spring Boot
+
+---
+
+TODO
 
 ---
