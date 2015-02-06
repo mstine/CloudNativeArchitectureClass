@@ -9,13 +9,6 @@ slidenumbers: true
 
 ---
 
-# [fit] Day 02
-# [fit] Session 04
-![](../../Common/images/cf_logo.png)
-
-
----
-
 ![left](../../Common/images/mattmug.jpeg)
 # Me
 
@@ -24,5 +17,22 @@ Senior Product Manager
 Pivotal
 [http://www.mattstine.com](http://www.mattstine.com)
 [matt.stine@gmail.com](mailto:matt.stine@gmail.com)
+
+---
+
+# [fit] Day 02
+# [fit] Session 04
+![](../../Common/images/cf_logo.png)
+
+---
+
+# [fit] Cloud-Native
+# [fit] Architecture
+# [fit] Patterns
+
+---
+
+# [fit] API
+# [fit] Gateways
 
 ---
