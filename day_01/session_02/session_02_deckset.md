@@ -20,13 +20,13 @@ Pivotal
 
 ---
 
-# [fit] Day 01
-# [fit] Session 02
+# [fit] Session
+# [fit] 2
 ![](../../Common/images/cf_logo.png)
 
 ---
 
-# [fit] Running
+# [fit] Operating
 # [fit] Twelve-Factor
 # [fit] Apps
 # [fit] with Cloud Foundry

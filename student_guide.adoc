@@ -17,16 +17,16 @@ matt.stine@gmail.com
 10:30 AM - 11:00 AM:: Morning Break
 11:00 AM - 12:30 PM:: *Session 2:* _Operating Twelve-Factor Apps with Cloud Foundry_
 12:30 PM - 1:45 PM:: Lunch
-1:45 PM - 3:15 PM:: *Session 3:* _Realizing Polyglot Persistence: Part One_
+1:45 PM - 3:15 PM:: *Session 3:* _Microservices with Polyglot Persistence: Part One_
 3:15 PM - 3:45 PM:: Afternoon Break
-3:45 PM - 5:15 PM:: *Session 4:* _Realizing Polyglot Persistence: Part Two_
+3:45 PM - 5:15 PM:: *Session 4:* _Microservices with Polyglot Persistence: Part Two_
 
 === Day Two
 
 8:00 AM - 9:00 AM:: Coffee Service
-9:00 AM - 10:30 AM:: *Session 5:* _Cloud-Native Architecture Architecture Patterns: Part One_
+9:00 AM - 10:30 AM:: *Session 5:* _Cloud-Native Architecture Patterns: Part One_
 10:30 AM - 11:00 AM:: Morning Break
-11:00 AM - 12:30 PM:: *Session 6:* _Cloud-Native Architecture Architecture Patterns: Part Two_
+11:00 AM - 12:30 PM:: *Session 6:* _Cloud-Native Architecture Patterns: Part Two_
 12:30 PM - 1:45 PM:: Lunch
 1:45 PM - 3:15 PM:: *Session 7:* _Securing Cloud-Native Applications_
 3:15 PM - 3:45 PM:: Afternoon Break

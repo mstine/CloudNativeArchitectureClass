@@ -20,15 +20,15 @@ Pivotal
 
 ---
 
-# [fit] Day 01
-# [fit] Session 01
+# [fit] Session
+# [fit] 1
 ![](../../Common/images/cf_logo.png)
 
 ---
 
-# [fit] What?
-# [fit] Why?
-# [fit] How?
+# [fit] Cloud-Native
+# [fit] Architecture
+# [fit] Overview
 
 ---
 

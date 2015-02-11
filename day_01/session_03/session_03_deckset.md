@@ -20,8 +20,8 @@ Pivotal
 
 ---
 
-# [fit] Day 01
-# [fit] Session 03
+# [fit] Session
+# [fit] 3
 ![](../../Common/images/cf_logo.png)
 
 ---
@@ -29,6 +29,7 @@ Pivotal
 # [fit] Microservices
 # [fit] with
 # [fit] Polyglot
-# [fit] Peristence
+# [fit] Peristence:
+# [fit] Part 1
 
 ---
