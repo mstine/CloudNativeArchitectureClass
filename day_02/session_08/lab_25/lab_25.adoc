@@ -1,0 +1,1 @@
+= Lab 25 - Implementing OAuth2 SSO in the API Gateway with Spring Cloud Security

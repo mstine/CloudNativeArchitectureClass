@@ -1,0 +1,1 @@
+= Lab 22 - Securing a Resource Server with Spring Cloud Security

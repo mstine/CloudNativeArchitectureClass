@@ -1,0 +1,1 @@
+= Lab 16 - Leveraging Eureka for Service Discovery via Spring Cloud Netflix
