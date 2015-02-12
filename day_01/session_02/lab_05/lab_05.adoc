@@ -1,1 +1,49 @@
 = Lab 5 - From Zero to Pushing Your First Application
+
+Registration Steps (TBD):
+
+. Make sure you've created a PWS account
+. Enter your username/email in the https://docs.google.com/spreadsheets/d/1kMlV-D3pIVQfhsDDcfFXDgYRsZk7zY7i-dQy0n098_E[Google Sheet].
+. You'll get an email that you've been invited to a space ( I think )
+
+== Target
+
+. If you haven't already, download the latest release of the Cloud Foundry CLI from https://github.com/cloudfoundry/cli/releases for your operating system and install it.
+
+. Set the API target for the CLI:
++
+----
+$ cf api api.run.pivotal.io
+----
+
+. Login to Pivotal Web Services:
++
+----
+$ cf login
+----
++
+Follow the prompts, choosing `oreilly-class` when prompted for an organization and `studentXX` when prompted for a space.
+
+. Clone the Spring Music application from GitHub:
++
+----
+$ git clone https://github.com/cloudfoundry-samples/spring-music.git
+----
+
+. Change to the Spring Music directory:
++
+----
+$ cd spring-music
+----
+
+. Using the Gradle Wrapper, build and package the application:
++
+----
+$ ./gradlew assemble
+----
+
+. Push the application!
++
+----
+$ cf push
+----

@@ -411,11 +411,93 @@ b.conum * { color: inherit !important; }
 <h1>Lab 5 - From Zero to Pushing Your First Application</h1>
 </div>
 <div id="content">
-
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Registration Steps (TBD):</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Make sure you&#8217;ve created a PWS account</p>
+</li>
+<li>
+<p>Enter your username/email in the <a href="https://docs.google.com/spreadsheets/d/1kMlV-D3pIVQfhsDDcfFXDgYRsZk7zY7i-dQy0n098_E">Google Sheet</a>.</p>
+</li>
+<li>
+<p>You&#8217;ll get an email that you&#8217;ve been invited to a space ( I think )</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_target">Target</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If you haven&#8217;t already, download the latest release of the Cloud Foundry CLI from <a href="https://github.com/cloudfoundry/cli/releases">https://github.com/cloudfoundry/cli/releases</a> for your operating system and install it.</p>
+</li>
+<li>
+<p>Set the API target for the CLI:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf api api.run.pivotal.io</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Login to Pivotal Web Services:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf login</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Follow the prompts, choosing <code>oreilly-class</code> when prompted for an organization and <code>studentXX</code> when prompted for a space.</p>
+</div>
+</li>
+<li>
+<p>Clone the Spring Music application from GitHub:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ git clone https://github.com/cloudfoundry-samples/spring-music.git</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Change to the Spring Music directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd spring-music</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using the Gradle Wrapper, build and package the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ ./gradlew assemble</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Push the application!</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf push</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 16:07:45 CST
+Last updated 2015-02-12 14:59:44 CST
 </div>
 </div>
 </body>
