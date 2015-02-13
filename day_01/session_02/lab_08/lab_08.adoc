@@ -87,7 +87,7 @@ OK
 requested state: started
 instances: 1/1
 usage: 512M x 1 instances
-urls: cf-scale-boot-stockinged-rust.cfapps.io, asdfasdfasdf.cfapps.io
+urls: cf-scale-boot-stockinged-rust.cfapps.io
 last uploaded: Fri Feb 13 18:56:29 UTC 2015
 
      state     since                    cpu    memory           disk
@@ -223,3 +223,94 @@ image::../../../Common/images/papertrail_5.png[]
 You can see how to connect to other third-party log management systems in the http://docs.cloudfoundry.org/devguide/services/log-management-thirdparty-svc.html[Cloud Foundry documentation].
 
 == Health
+
+Cloud Foundry's http://docs.cloudfoundry.org/concepts/architecture/#hm9k[Heatlh Manager] actively monitors the health of our application processes and will restart them should they crash.
+
+. If you don't have one already running, start a log tail for `cf-scale-boot`:
++
+----
+$ cf logs cf-scale-boot
+----
+
+. Visit the application in the browser, and click on the ``Kill Switch'' button. This button will trigger a JVM exit with an error code (`System.exit(1)`), causing the Health Manager to observe an application instance crash:
++
+image::../../../Common/images/cf-scale-boot-kill.png[]
+
+. After clicking the kill switch a couple of interesting things should happen.
+First, you'll see an error code returned in the browser, as the request you submitted never returns a response:
++
+image::../../../Common/images/bad_gateway.png[]
++
+Also, if you're paying attention to the log tail, you'll see some interesting log messages fly by:
++
+====
+----
+2015-02-13T17:17:54.86-0600 [App/0]      OUT 2015-02-13 23:17:54.860 ERROR 36 --- [io-61617-exec-5] WebApplication                           : KILL SWITCH ACTIVATED! <1>
+2015-02-13T17:17:54.86-0600 [App/0]      OUT 2015-02-13 23:17:54.869  INFO 36 --- [       Thread-2] ationConfigEmbeddedWebApplicationContext : Closing org.springframework.boot.c$ntext.embedded.AnnotationConfigEmbeddedWebApplicationContext@6a62811d: startup date [Fri Feb 13 22:57:05 UTC 2015]; root of context hierarchy
+2015-02-13T17:17:54.87-0600 [App/0]      OUT 2015-02-13 23:17:54.870  INFO 36 --- [       Thread-2] o.s.c.support.DefaultLifecycleProcessor  : Stopping beans in phase 0
+2015-02-13T17:17:54.87-0600 [App/0]      OUT 2015-02-13 23:17:54.874  INFO 36 --- [       Thread-2] o.s.b.a.e.jmx.EndpointMBeanExporter      : Unregistering JMX-exposed beans on shutdown
+2015-02-13T17:17:54.87-0600 [App/0]      OUT 2015-02-13 23:17:54.878  INFO 36 --- [       Thread-2] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
+2015-02-13T17:17:57.30-0600 [RTR/1]      OUT cf-scale-boot-stockinged-rust.cfapps.io - [13/02/2015:23:17:54 +0000] "GET /killSwitch HTTP/1.1" 502 0 "http://cf-scale-boot-stockinged-rust.cfapps.io/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36" 10.10.2.122:25194 x_forwarded_for:"50.157.39.197" vcap_request_id:fc2b93a9-451d-460f-726e-14ada0069ff4 response_time:2.465784807 app_id:7a428901-1691-4cce-b7f6-62d186c5cb55 <2>
+2015-02-13T17:17:57.31-0600 [App/0]      ERR
+2015-02-13T17:17:57.38-0600 [API/2]      OUT App instance exited with guid 7a428901-1691-4cce-b7f6-62d186c5cb55 payload: {"cc_partition"=>"default", "droplet"=>"7a428901-1691-4cce-b7f6-62d186c5cb55", "version"=>"ebcdb262-2851-4716-83a4-c816fa2c68bb", "instance"=>"1eecfb8d3b41492a8e36237b365a4755", "index"=>0, "reason"=>"CRASHED", "exit_status"=>1, "exit_description"=>"app instance exited", "crash_timestamp"=>1423869477} <3>
+----
+<1> Just before issuing the `System.exit(1)` call, the application logs that the kill switch was clicked.
+<2> The (Go)Router logs the 502 error.
+<3> The API logs that an application instance exited due to a crash.
+====
+
+. Check the application events to see another indicator of the crash:
++
+----
+$ cf events cf-scale-boot
+Getting events for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+
+time                          event                 actor               description
+2015-02-13T17:17:57.00-0600   app.crash             cf-scale-boot       index: 0, reason: CRASHED, exit_description: app instance exited, exit_status: 1
+----
+
+. By this time you should have noticed some additional interesting events in the logs:
++
+====
+----
+2015-02-13T17:18:14.67-0600 [DEA/19]     OUT Starting app instance (index 0) with guid 7a428901-1691-4cce-b7f6-62d186c5cb55 <1>
+2015-02-13T17:18:24.72-0600 [App/0]      OUT Resolving dependencies.... <2>
+2015-02-13T17:18:26.62-0600 [App/0]      OUT   .   ____          _            __ _ _
+2015-02-13T17:18:26.62-0600 [App/0]      OUT  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+2015-02-13T17:18:26.62-0600 [App/0]      OUT ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+2015-02-13T17:18:26.62-0600 [App/0]      OUT  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+2015-02-13T17:18:26.62-0600 [App/0]      OUT   '  |____| .__|_| |_|_| |_\__, | / / / /
+2015-02-13T17:18:26.62-0600 [App/0]      OUT  =========|_|==============|___/=/_/_/_/
+2015-02-13T17:18:26.62-0600 [App/0]      OUT  :: Spring Boot ::        (v1.1.9.RELEASE)
+----
+<1> The DEA indicates that it is starting another instance of the application as a result of the Health Manager observing a difference between the desired and actual state (i.e. running instances = 1 vs. running instances = 0).
+<2> The new application instance starts logging events as it starts up.
+====
+
+. Revisiting the *HOME PAGE* of the application (don't simply refresh the browser as you're still on the `/killSwitch` endpoint and you'll just kill the application again!) and you should see a fresh instance started:
++
+image::../../../Common/images/cf-scale-boot-healed.png[]
+
+== Clean Up
+
+Because of the limited PWS quota we have for this course, let's clean up our application and services to make room for future labs.
+
+. Delete the `cf-scale-boot` application:
++
+----
+$ cf d cf-scale-boot
+
+Really delete the app cf-scale-boot?> y
+Deleting app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+'OK
+----
+
+. Delete the `cf-scale-boot-logs` service:
++
+----
+$ cf ds cf-scale-boot-logs
+
+Really delete the service cf-scale-boot-logs?> y
+Deleting service cf-scale-boot-logs in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
