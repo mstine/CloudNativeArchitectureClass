@@ -5,7 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.2">
-<title>Lab 7 - Scaling Applications</title>
+<title>cf-scale-boot</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
 /* ========================================================================== HTML5 display definitions ========================================================================== */
@@ -703,209 +703,53 @@ h2 { color: #325D72; border-bottom: 1px solid #dddddd; }
 </head>
 <body class="article">
 <div id="header">
-<h1>Lab 7 - Scaling Applications</h1>
+<h1>cf-scale-boot</h1>
 </div>
 <div id="content">
 <div id="preamble">
 <div class="sectionbody">
-<div class="quoteblock abstract">
-<blockquote>
 <div class="paragraph">
-<p>Cloud Foundry makes the work of horizontally scaling application instances and updating load balancer routing tables easy.</p>
-</div>
-<div class="paragraph">
-<p>In this lab, we&#8217;ll use a Spring Boot CLI app designed to illustrate Cloud Foundry operations such as scaling.</p>
-</div>
-</blockquote>
+<p>Demonstrate application instance scaling on Cloud Foundry with this simple (one Groovy file, one HTML file) Spring Boot CLI application!</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_push_the_code_cf_scale_boot_code_application">Push the <code>cf-scale-boot</code> Application</h2>
+<h2 id="_running_on_cloud_foundry">Running on Cloud Foundry</h2>
 <div class="sectionbody">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Change to the <code>cf-scale-boot</code> sample application directory:</p>
-<div class="listingblock">
-<div class="content">
-<pre>$ cd $COURSE_HOME/day_01/session_02/lab_07/cf-scale-boot</pre>
-</div>
-</div>
-</li>
-<li>
-<p>Spring Boot CLI applications do not require a separate build step, so go ahead and push the application:</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ cf push</pre>
 </div>
 </div>
-</li>
-<li>
-<p>Once again, this application&#8217;s manifest is configured to have a random route assigned to the application.
-So, when the CLI indicates that application is up and running, visit its route in the browser:</p>
-<div class="imageblock">
+</div>
+</div>
+<div class="sect1">
+<h2 id="_scale">SCALE!</h2>
+<div class="sectionbody">
+<div class="listingblock">
 <div class="content">
-<img src="../../../Common/images/cf-scale-boot-initial.png" alt="cf scale boot initial">
+<pre>$ cf scale cf-scale-boot -i 1000</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You&#8217;ll see that the application is reporting various bits of information that it has discovered from its environment.
-Of primary interest is that this application reports its <em>instance index</em>.
-It also keeps track of and reports how many web requests that this instance has serviced.</p>
-</div>
-</li>
-</ol>
+<p>(<em>or some reasonable number for your CF cloud!</em>)</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_scale_the_application_up">Scale the Application Up</h2>
+<h2 id="_what_you_get">What you get:</h2>
 <div class="sectionbody">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Now let&#8217;s increase the number of running application instances to 5:</p>
-<div class="listingblock">
-<div class="content">
-<pre>$ cf scale -i 5 cf-scale-boot
-Scaling app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
-OK</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>In reporting <code>OK</code>, the CLI is letting you know that the additional requested instances have been started, but they are not yet necessarily running.</p>
-</div>
-</li>
-<li>
-<p>We can determine how many instances are actually running like this:</p>
-<div class="listingblock">
-<div class="content">
-<pre>$ cf app cf-scale-boot
-Showing health and status for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
-OK
-
-requested state: started
-instances: 5/5
-usage: 512M x 5 instances
-urls: cf-scale-boot-stockinged-rust.cfapps.io
-last uploaded: Fri Feb 13 18:56:29 UTC 2015
-
-     state      since                    cpu    memory           disk
-#0   running    2015-02-13 12:57:10 PM   0.1%   404.8M of 512M   128.9M of 1G <b class="conum">(1)</b>
-#1   starting   2015-02-13 03:04:33 PM   0.0%   0 of 0           0 of 0 <b class="conum">(2)</b>
-#2   running    2015-02-13 03:04:47 PM   0.0%   398.7M of 512M   128.9M of 1G
-#3   starting   2015-02-13 03:04:33 PM   0.0%   0 of 0           0 of 0
-#4   starting   2015-02-13 03:04:33 PM   0.0%   0 of 0           0 of 0</pre>
-</div>
-</div>
-<div class="colist arabic">
-<ol>
-<li>
-<p>This application instance has completed the startup process and is actually able to accept requests.</p>
-</li>
-<li>
-<p>This application instance is still starting and will not have any requests routed to it.</p>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>Eventually all instances will converge to a running state:</p>
-<div class="listingblock">
-<div class="content">
-<pre>$ cf app cf-scale-boot
-Showing health and status for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
-OK
-
-requested state: started
-instances: 5/5
-usage: 512M x 5 instances
-urls: cf-scale-boot-stockinged-rust.cfapps.io
-last uploaded: Fri Feb 13 18:56:29 UTC 2015
-
-     state     since                    cpu    memory           disk
-#0   running   2015-02-13 12:57:10 PM   0.1%   404.8M of 512M   128.9M of 1G
-#1   running   2015-02-13 03:04:51 PM   0.1%   377.5M of 512M   128.9M of 1G
-#2   running   2015-02-13 03:04:47 PM   0.1%   397.3M of 512M   128.9M of 1G
-#3   running   2015-02-13 03:05:03 PM   0.0%   389.2M of 512M   128.9M of 1G
-#4   running   2015-02-13 03:04:52 PM   0.1%   393.4M of 512M   128.9M of 1G</pre>
-</div>
-</div>
-</li>
-<li>
-<p>Revisit the application route in the browser.
-Refresh several times.
-You should observe the instance index and request counters changing as you do so:</p>
 <div class="imageblock">
 <div class="content">
-<img src="../../../Common/images/cf-scale-boot-scaled.png" alt="cf scale boot scaled">
+<img src="docs/screenshot.png" alt="screenshot">
 </div>
-</div>
-<div class="paragraph">
-<p>The aforementioned <a href="http://docs.cloudfoundry.org/concepts/architecture/router.html">(Go)Router</a> is applying a random routing algorithm to all of the application instances assigned to this route.
-As an instance reaches the <code>running</code> state, its <a href="http://docs.cloudfoundry.org/concepts/architecture/execution-agent.html">DEA</a> registers that instance in the routing table assigned to its route by sending a message to Cloud Foundry&#8217;s message bus.
-All (Go)Router instances are subscribed to this channel and register the routes independently.
-This makes for very dynamic and rapid reconfiguration!</p>
-</div>
-</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_scale_the_application_down">Scale the Application Down</h2>
-<div class="sectionbody">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>We can scale the application instances back down as easily as we scaled them up, using the same command structure:</p>
-<div class="listingblock">
-<div class="content">
-<pre>$ cf scale -i 1 cf-scale-boot
-Scaling app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
-OK</pre>
-</div>
-</div>
-</li>
-<li>
-<p>Check the application status again:</p>
-<div class="listingblock">
-<div class="content">
-<pre>$ cf app cf-scale-boot
-Showing health and status for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
-OK
-
-requested state: started
-instances: 1/1
-usage: 512M x 1 instances
-urls: cf-scale-boot-stockinged-rust.cfapps.io
-last uploaded: Fri Feb 13 18:56:29 UTC 2015
-
-     state     since                    cpu    memory         disk
-#0   running   2015-02-13 12:57:10 PM   0.1%   405M of 512M   128.9M of 1G</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>As you can see, we&#8217;re back down to only one instance running, and it is in fact the original index 0 that we started with.</p>
-</div>
-</li>
-<li>
-<p>Confirm that by again revisiting the route in the browser and checking the instance index and request counter:</p>
-<div class="imageblock">
-<div class="content">
-<img src="../../../Common/images/cf-scale-boot-unscaled.png" alt="cf scale boot unscaled">
-</div>
-</div>
-</li>
-</ol>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-13 15:24:38 CST
+Last updated 2015-02-13 14:20:38 CST
 </div>
 </div>
 </body>
