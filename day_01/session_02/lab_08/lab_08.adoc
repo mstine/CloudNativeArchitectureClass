@@ -1,1 +1,116 @@
 = Lab 8 - Monitoring Applications
+
+Cloud Foundry provides several built-in mechanisms that allow us to monitor our applications' state changes and behavior.
+Additionally, Cloud Foundry actively monitors the health of our application processes and will restart them should they crash.
+In this lab, we'll explore a few of these mechanisms.
+
+== Events
+
+Cloud Foundry only allows application configuration to be modified via its API.
+This gives application operators confidence that all changes to application configuration are known and auditable.
+It also reduces the number of causes that must be considered when problems arise.
+
+All application configuration changes are recorded as _events_.
+These events can be viewed via the Cloud Foundry API, and viewing is facilitated via the CLI.
+
+Take a look at the events that have transpired so far for our deployment of `cf-scale-boot`:
+
+====
+----
+$ cf events cf-scale-boot
+Getting events for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+
+time                          event                 actor               description
+2015-02-13T15:18:33.00-0600   audit.app.update      mstine@pivotal.io   instances: 1 <6>
+2015-02-13T15:04:34.00-0600   audit.app.update      mstine@pivotal.io   instances: 5 <5>
+2015-02-13T12:56:35.00-0600   audit.app.update      mstine@pivotal.io   state: STARTED <4>
+2015-02-13T12:56:26.00-0600   audit.app.update      mstine@pivotal.io <3>
+2015-02-13T12:56:26.00-0600   audit.app.map-route   mstine@pivotal.io <2>
+2015-02-13T12:56:24.00-0600   audit.app.create      mstine@pivotal.io   instances: 1, memory: 512, state: STOPPED, environment_json: PRIVATE DATA HIDDEN <1>
+----
+<1> Events are sorted newest to oldest, so we'll start from the bottom.
+Here we see the `app.create` event, which created our application's record and stored all of its metadata (e.g. `memory: 512`).
+<2> The `app.map-route` event records the incoming request to assign a route to our application.
+<3> This `app.update` event records the resulting change to our applications metadata.
+<4> This `app.update` event records the change of our application's state to `STARTED`.
+<5> Remember scaling the application up? This `app.update` event records the metadata change `instances: 5`.
+<6> And here's the `app.update` even recording our scaling of the application back down with `instances: 1`.
+====
+
+. Let's explicitly ask for the application to be stopped:
++
+----
+$ cf stop cf-scale-boot
+Stopping app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
+
+. Now, examine the additional `app.update` event:
++
+----
+$ cf events cf-scale-boot
+Getting events for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+
+time                          event                 actor               description
+2015-02-13T15:59:10.00-0600   audit.app.update      mstine@pivotal.io   state: STOPPED
+2015-02-13T15:18:33.00-0600   audit.app.update      mstine@pivotal.io   instances: 1
+2015-02-13T15:04:34.00-0600   audit.app.update      mstine@pivotal.io   instances: 5
+2015-02-13T12:56:35.00-0600   audit.app.update      mstine@pivotal.io   state: STARTED
+2015-02-13T12:56:26.00-0600   audit.app.update      mstine@pivotal.io
+2015-02-13T12:56:26.00-0600   audit.app.map-route   mstine@pivotal.io
+2015-02-13T12:56:24.00-0600   audit.app.create      mstine@pivotal.io   instances: 1, memory: 512, state: STOPPED, environment_json: PRIVATE DATA HIDDEN
+----
+
+. Start the application again:
++
+----
+$ cf start cf-scale-boot
+Starting app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+
+0 of 1 instances running, 1 starting
+0 of 1 instances running, 1 starting
+0 of 1 instances running, 1 starting
+1 of 1 instances running
+
+
+App started
+
+
+OK
+
+App cf-scale-boot was started using this command `JAVA_HOME=$PWD/.java-buildpack/open_jdk_jre JAVA_OPTS="-Djava.io.tmpdir=$TMPDIR -XX:OnOutOfMemoryError=$PWD/.java-buildpack/open_jdk_jre/bin/killjava.sh -Xmx382293K -Xms382293K -XX:MaxMetaspaceSize=64M -XX:MetaspaceSize=64M -Xss995K" SERVER_PORT=$PORT $PWD/.java-buildpack/spring_boot_cli/bin/spring run app.groovy`
+
+Showing health and status for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: cf-scale-boot-stockinged-rust.cfapps.io, asdfasdfasdf.cfapps.io
+last uploaded: Fri Feb 13 18:56:29 UTC 2015
+
+     state     since                    cpu    memory           disk
+#0   running   2015-02-13 04:01:50 PM   0.0%   389.1M of 512M   128.9M of 1G
+----
+
+. And again, view the additional `app.update` event:
++
+----
+$ cf events cf-scale-boot
+Getting events for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+
+time                          event                 actor               description
+2015-02-13T16:01:28.00-0600   audit.app.update      mstine@pivotal.io   state: STARTED
+2015-02-13T15:59:10.00-0600   audit.app.update      mstine@pivotal.io   state: STOPPED
+2015-02-13T15:18:33.00-0600   audit.app.update      mstine@pivotal.io   instances: 1
+2015-02-13T15:04:34.00-0600   audit.app.update      mstine@pivotal.io   instances: 5
+2015-02-13T12:56:35.00-0600   audit.app.update      mstine@pivotal.io   state: STARTED
+2015-02-13T12:56:26.00-0600   audit.app.update      mstine@pivotal.io
+2015-02-13T12:56:26.00-0600   audit.app.map-route   mstine@pivotal.io
+2015-02-13T12:56:24.00-0600   audit.app.create      mstine@pivotal.io   instances: 1, memory: 512, state: STOPPED, environment_json: PRIVATE DATA HIDDEN
+----
+
+== Logs
+
+
+== Health
