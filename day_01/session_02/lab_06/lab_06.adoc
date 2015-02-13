@@ -130,3 +130,98 @@ image::../../../Common/images/pgadmin_db_instance.png[]
 . Right-click on the `album` table and choose ``View Data > View All Rows'' to see the data inserted as part of _Spring Music_'s startup process:
 +
 image::../../../Common/images/pgadmin_table.png[]
+
+== Swapping from PostgreSQL to MongoDB
+
+. Now let's bind our _Spring Music_ application to MongoDB instead of PostgreSQL. First let's create footnote:[Notice in this listing that we're typing `cf cs` rather than `cf create-service`.
+Most CF CLI commands have a shorthand version to save typing time.
+You can view these shorthand commands via `cf help` or `cf h` (See! More shorthand!).] a MongoDB instance from https://mongolab.com/[MongoLab]:
++
+----
+$ cf cs mongolab sandbox spring-music-mongo
+Creating service spring-music-mongo in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
+
+. Next we'll unbind our application from our PostgreSQL instance (_Spring Music_ does not support being bound to multiple datasources at the same time):
++
+----
+$ cf us spring-music spring-music-db
+----
++
+If you visit your application now, you'll see that it still works.
+If you recall, environment variable changes (such as binding/unbinding of services) don't actually take effect until a _restage_ or _restart_.
+
+. Now let's bind the application to our MongoDB instance:
++
+----
+$ cf bs spring-music spring-music-mongo
+Binding service spring-music-mongo to app spring-music in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+TIP: Use 'cf restage' to ensure your env variable changes take effect
+----
+
+. And then do a restage:
++
+----
+$ cf restage spring-music
+----
+
++
+Once the application is running again, revisit or refresh the browser tab where you have the _Spring Music_ application loaded:
++
+image::../../../Common/images/Spring_Music_Mongo.png[]
++
+As you can see from the information dialog, the application is now utilizing a MongoDB database via the `spring-music-mongo` service.
+
+. Let's take a direct look at the data in MongoDB by utilizing the `Manage` link in PWS App Manager:
++
+image::../../../Common/images/PWS_Manage_Spring_Music_Mongo.png[]
++
+This uses Cloud Foundry service SSO to pass your authentication through to MongoLab's management UI (you may be asked to authenticate again because your session may have expired with PWS's login server).
+
+. Once in MongoLab's UI, click on your deployment:
++
+image::../../../Common/images/MongoLab_Deployment.png[]
+
+. Next, click on your `albums` collection:
++
+image::../../../Common/images/MongoLab_Collection.png[]
+
+. Now you should be able to see the documents in your collection:
++
+image::../../../Common/images/MongoLab_Document.png[]
+
+== Clean Up
+
+Because of the limited PWS quota we have for this course, let's clean up our application and services to make room for future labs.
+
+. Delete the `spring-music` application:
++
+----
+$ cf d spring-music
+
+Really delete the app spring-music?> y
+Deleting app spring-music in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
+
+. Delete the `spring-music-mongo` service:
++
+----
+$ cf ds spring-music-mongo
+
+Really delete the service spring-music-mongo?> y
+Deleting service spring-music-mongo in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
+
+. Delete the `spring-music-db` service:
++
+----
+$ cf ds spring-music-db
+
+Really delete the service spring-music-db?> y
+Deleting service spring-music-db in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
