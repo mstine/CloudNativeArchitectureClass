@@ -116,3 +116,17 @@ Once the application is running again, revisit or refresh the browser tab where 
 image::../../../Common/images/Spring_Music_PGSQL.png[]
 +
 As you can see from the information dialog, the application is now utilizing a PostgreSQL database via the `spring-music-db` service.
+
+. *(OPTIONAL STEPS)* If you have a PostgreSQL GUI tool handy (you can download a free one at http://www.pgadmin.org/download), you can also take a look at the _Spring Music_ data directly in the database.
+
+. In pgAdmin, create a new server connection and populate the properties with values from the URI in your `VCAP_SERVICES` environment variable (remember `cf env spring-muisc`!):
++
+image::../../../Common/images/pgadmin_props.png[]
+
+. Connect to the server and scroll (if necessary) until you find your specific database instance:
++
+image::../../../Common/images/pgadmin_db_instance.png[]
+
+. Right-click on the `album` table and choose ``View Data > View All Rows'' to see the data inserted as part of _Spring Music_'s startup process:
++
+image::../../../Common/images/pgadmin_table.png[]
