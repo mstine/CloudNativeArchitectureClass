@@ -1,3 +1,4 @@
+:compat-mode:
 = Lab 8 - Monitoring Applications
 
 Cloud Foundry provides several built-in mechanisms that allow us to monitor our applications' state changes and behavior.
@@ -112,5 +113,113 @@ time                          event                 actor               descript
 
 == Logs
 
+One of the most important enablers of visibility into application behavior is logging.
+Effective management of logs has historically been very difficult.
+Cloud Foundry's https://github.com/cloudfoundry/loggregator[log aggregation] components simplify log management by assuming responsibility for it.
+Application developers need only log all messages to either `STDOUT` or `STDERR`, and the platform will capture these messages.
+
+=== For Developers
+
+Application developers can view application logs using the CF CLI.
+
+. Let's view recent log messages for `cf-scale-boot`:
++
+----
+$ cf logs cf-scale-boot --recent
+----
++
+Here are two interesting subsets of one output from that command:
++
+.CF Component Logs
+====
+----
+2015-02-13T14:45:39.40-0600 [RTR/0]      OUT cf-scale-boot-stockinged-rust.cfapps.io - [13/02/2015:20:45:39 +0000] "GET /css/bootstrap.min.css HTTP/1.1" 304 0 "http://cf-scale-boot-stockinged-rust.cfapps.io/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36" 10.10.66.88:50372 x_forwarded_for:"50.157.39.197" vcap_request_id:84cc1b7a-bb30-4355-7512-5adaf36ff767 response_time:0.013115764 app_id:7a428901-1691-4cce-b7f6-62d186c5cb55 <1>
+2015-02-13T14:45:39.40-0600 [RTR/1]      OUT cf-scale-boot-stockinged-rust.cfapps.io - [13/02/2015:20:45:39 +0000] "GET /img/LOGO_CloudFoundry_Large.png HTTP/1.1" 304 0 "http://cf-scale-boot-stockinged-rust.cfapps.io/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36" 10.10.66.88:24323 x_forwarded_for:"50.157.39.197" vcap_request_id:b3e2466b-6a41-4c6d-5b3d-0f70702c0ec1 response_time:0.010003444 app_id:7a428901-1691-4cce-b7f6-62d186c5cb55
+2015-02-13T15:04:33.09-0600 [API/1]      OUT Tried to stop app that never received a start event <2>
+2015-02-13T15:04:33.51-0600 [DEA/12]     OUT Starting app instance (index 2) with guid 7a428901-1691-4cce-b7f6-62d186c5cb55 <3>
+2015-02-13T15:04:33.71-0600 [DEA/4]      OUT Starting app instance (index 3) with guid 7a428901-1691-4cce-b7f6-62d186c5cb55
+----
+<1> An ``Apache-style'' access log event from the (Go)Router
+<2> An API log event that corresponds to an event as shown in `cf events`
+<3> A DEA log event indicating the start of an application instance on that DEA.
+====
++
+.Application Logs
+====
+----
+2015-02-13T16:01:50.28-0600 [App/0]      OUT 2015-02-13 22:01:50.282  INFO 36 --- [       runner-0] o.s.b.a.e.jmx.EndpointMBeanExporter      : Located managed bean 'autoConfigurationAuditEndpoint': registering with JMX server as MBean [org.springframework.boot:type=Endpoint,name=autoConfigurationAuditEndpoint]
+2015-02-13T16:01:50.28-0600 [App/0]      OUT 2015-02-13 22:01:50.287  INFO 36 --- [       runner-0] o.s.b.a.e.jmx.EndpointMBeanExporter      : Located managed bean 'shutdownEndpoint': registering with JMX server as MBean [org.springframework.boot:type=Endpoint,name=shutdownEndpoint]
+2015-02-13T16:01:50.29-0600 [App/0]      OUT 2015-02-13 22:01:50.299  INFO 36 --- [       runner-0] o.s.b.a.e.jmx.EndpointMBeanExporter      : Located managed bean 'configurationPropertiesReportEndpoint': registering with JMX server as MBean [org.springframework.boot:type=Endpoint,name=configurationPropertiesReportEndpoint]
+2015-02-13T16:01:50.36-0600 [App/0]      OUT 2015-02-13 22:01:50.359  INFO 36 --- [       runner-0] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 61316/http
+2015-02-13T16:01:50.36-0600 [App/0]      OUT Started...
+2015-02-13T16:01:50.36-0600 [App/0]      OUT 2015-02-13 22:01:50.364  INFO 36 --- [       runner-0] o.s.boot.SpringApplication               : Started application in 6.906 seconds (JVM running for 15.65)
+----
+====
++
+As you can see, Cloud Foundry's log aggregation components capture both application logs and CF component logs relevant to your application.
+These events are properly interleaved based on time, giving you an accurate picture of events as they transpired across the system.
+
+. To get a running ``tail'' of the application logs rather than a dump, simply type:
++
+----
+$ cf logs cf-scale-boot
+----
++
+You can try various things like refreshing the browser and triggering stop/start events to see logs being generated.
+
+=== For Operators (OPTIONAL)
+
+Application operators will also enjoy commands like `cf logs`, but are often interested in long-term retention, indexing, and analysis of logs as well.
+Cloud Foundry currently only provides short-term retention of logs.
+To meet these needs, Cloud Foundry provides the ability to http://docs.cloudfoundry.org/devguide/services/log-management.html[drain logs to third-party providers.]
+
+In this section, we'll drain logs to a very simple provider called https://papertrailapp.com[Papertrail].
+
+. Visit https://papertrailapp.com and create a free account.
+
+. Login to your account and add your first system:
++
+image::../../../Common/images/papertrail_1.png[]
+
+. Click on ``Alternatives'':
++
+image::../../../Common/images/papertrail_2.png[]
+
+. Choose ``I use Heroku'' and provide a name:
++
+image::../../../Common/images/papertrail_3.png[]
+
+. Note the URL + Port assigned to your application:
++
+image::../../../Common/images/papertrail_4.png[]
+
+. We'll use a Cloud Foundry http://docs.cloudfoundry.org/devguide/services/user-provided.html[user-provided service instance] to create the log drain for our application using the URL + Port provided by Papertrail:
++
+----
+$ cf cups cf-scale-boot-logs -l syslog://logs2.papertrailapp.com:43882
+Creating user provided service cf-scale-boot-logs in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
+
+. We bind that service instance like those we created in link:../lab_06/lab_06.html[Lab 6]:
++
+----
+$ cf bs cf-scale-boot cf-scale-boot-logs
+Binding service cf-scale-boot-logs to app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+TIP: Use 'cf restage' to ensure your env variable changes take effect
+----
+
+. We'll use a `cf restart` rather than `cf restage` to make the binding take effect:
++
+----
+$ cf restart cf-scale-boot
+----
+
+. Refresh the Papertrail browser tab to see log events immediately flowing to the log viewing page:
++
+image::../../../Common/images/papertrail_5.png[]
+
+You can see how to connect to other third-party log management systems in the http://docs.cloudfoundry.org/devguide/services/log-management-thirdparty-svc.html[Cloud Foundry documentation].
 
 == Health
