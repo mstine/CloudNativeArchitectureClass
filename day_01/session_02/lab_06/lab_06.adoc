@@ -74,6 +74,7 @@ $ cf env spring-music
 +
 The subset of the output we're interested in is located near the very top, titled `System-Provided`:
 +
+====
 ----
 System-Provided:
 {
@@ -103,6 +104,7 @@ System-Provided:
 ----
 <1> `VCAP_SERVICES` is a special Cloud Foundry environment variable that contains a JSON document containing all of the information for any services bound to an application.
 <2> Notice here the unique URI for this instance of PostgreSQL that `spring-music` has been bound to.
+====
 
 . Now let's _restage_ the application, which cycles our application back through the staging/buildpack process before redeploying the application.footnote:[In this case, we could accomplish the same goal by only _restarting_ the application via `cf restart spring-music`.
 A _restage_ is generally recommended because Cloud Foundry buildpacks also have access to injected environment variables and can install or configure things differently based on their values.]

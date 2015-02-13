@@ -34,7 +34,7 @@ Here we see the `app.create` event, which created our application's record and s
 <3> This `app.update` event records the resulting change to our applications metadata.
 <4> This `app.update` event records the change of our application's state to `STARTED`.
 <5> Remember scaling the application up? This `app.update` event records the metadata change `instances: 5`.
-<6> And here's the `app.update` even recording our scaling of the application back down with `instances: 1`.
+<6> And here's the `app.update` event recording our scaling of the application back down with `instances: 1`.
 ====
 
 . Let's explicitly ask for the application to be stopped:

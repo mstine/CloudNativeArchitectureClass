@@ -44,6 +44,7 @@ In reporting `OK`, the CLI is letting you know that the additional requested ins
 
 . We can determine how many instances are actually running like this:
 +
+====
 ----
 $ cf app cf-scale-boot
 Showing health and status for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
@@ -64,6 +65,7 @@ last uploaded: Fri Feb 13 18:56:29 UTC 2015
 ----
 <1> This application instance has completed the startup process and is actually able to accept requests.
 <2> This application instance is still starting and will not have any requests routed to it.
+====
 
 . Eventually all instances will converge to a running state:
 +

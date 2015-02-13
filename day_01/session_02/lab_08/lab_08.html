@@ -706,11 +706,174 @@ h2 { color: #325D72; border-bottom: 1px solid #dddddd; }
 <h1>Lab 8 - Monitoring Applications</h1>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cloud Foundry provides several built-in mechanisms that allow us to monitor our applications' state changes and behavior.
+Additionally, Cloud Foundry actively monitors the health of our application processes and will restart them should they crash.
+In this lab, we&#8217;ll explore a few of these mechanisms.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_events">Events</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cloud Foundry only allows application configuration to be modified via its API.
+This gives application operators confidence that all changes to application configuration are known and auditable.
+It also reduces the number of causes that must be considered when problems arise.</p>
+</div>
+<div class="paragraph">
+<p>All application configuration changes are recorded as <em>events</em>.
+These events can be viewed via the Cloud Foundry API, and viewing is facilitated via the CLI.</p>
+</div>
+<div class="paragraph">
+<p>Take a look at the events that have transpired so far for our deployment of <code>cf-scale-boot</code>:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre>$ cf events cf-scale-boot
+Getting events for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
 
+time                          event                 actor               description
+2015-02-13T15:18:33.00-0600   audit.app.update      mstine@pivotal.io   instances: 1 <b class="conum">(6)</b>
+2015-02-13T15:04:34.00-0600   audit.app.update      mstine@pivotal.io   instances: 5 <b class="conum">(5)</b>
+2015-02-13T12:56:35.00-0600   audit.app.update      mstine@pivotal.io   state: STARTED <b class="conum">(4)</b>
+2015-02-13T12:56:26.00-0600   audit.app.update      mstine@pivotal.io <b class="conum">(3)</b>
+2015-02-13T12:56:26.00-0600   audit.app.map-route   mstine@pivotal.io <b class="conum">(2)</b>
+2015-02-13T12:56:24.00-0600   audit.app.create      mstine@pivotal.io   instances: 1, memory: 512, state: STOPPED, environment_json: PRIVATE DATA HIDDEN <b class="conum">(1)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Events are sorted newest to oldest, so we&#8217;ll start from the bottom.
+Here we see the <code>app.create</code> event, which created our application&#8217;s record and stored all of its metadata (e.g. <code>memory: 512</code>).</p>
+</li>
+<li>
+<p>The <code>app.map-route</code> event records the incoming request to assign a route to our application.</p>
+</li>
+<li>
+<p>This <code>app.update</code> event records the resulting change to our applications metadata.</p>
+</li>
+<li>
+<p>This <code>app.update</code> event records the change of our application&#8217;s state to <code>STARTED</code>.</p>
+</li>
+<li>
+<p>Remember scaling the application up? This <code>app.update</code> event records the metadata change <code>instances: 5</code>.</p>
+</li>
+<li>
+<p>And here&#8217;s the <code>app.update</code> event recording our scaling of the application back down with <code>instances: 1</code>.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Let&#8217;s explicitly ask for the application to be stopped:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf stop cf-scale-boot
+Stopping app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+OK</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Now, examine the additional <code>app.update</code> event:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf events cf-scale-boot
+Getting events for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+
+time                          event                 actor               description
+2015-02-13T15:59:10.00-0600   audit.app.update      mstine@pivotal.io   state: STOPPED
+2015-02-13T15:18:33.00-0600   audit.app.update      mstine@pivotal.io   instances: 1
+2015-02-13T15:04:34.00-0600   audit.app.update      mstine@pivotal.io   instances: 5
+2015-02-13T12:56:35.00-0600   audit.app.update      mstine@pivotal.io   state: STARTED
+2015-02-13T12:56:26.00-0600   audit.app.update      mstine@pivotal.io
+2015-02-13T12:56:26.00-0600   audit.app.map-route   mstine@pivotal.io
+2015-02-13T12:56:24.00-0600   audit.app.create      mstine@pivotal.io   instances: 1, memory: 512, state: STOPPED, environment_json: PRIVATE DATA HIDDEN</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Start the application again:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf start cf-scale-boot
+Starting app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+
+0 of 1 instances running, 1 starting
+0 of 1 instances running, 1 starting
+0 of 1 instances running, 1 starting
+1 of 1 instances running
+
+
+App started
+
+
+OK
+
+App cf-scale-boot was started using this command `JAVA_HOME=$PWD/.java-buildpack/open_jdk_jre JAVA_OPTS="-Djava.io.tmpdir=$TMPDIR -XX:OnOutOfMemoryError=$PWD/.java-buildpack/open_jdk_jre/bin/killjava.sh -Xmx382293K -Xms382293K -XX:MaxMetaspaceSize=64M -XX:MetaspaceSize=64M -Xss995K" SERVER_PORT=$PORT $PWD/.java-buildpack/spring_boot_cli/bin/spring run app.groovy`
+
+Showing health and status for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: cf-scale-boot-stockinged-rust.cfapps.io, asdfasdfasdf.cfapps.io
+last uploaded: Fri Feb 13 18:56:29 UTC 2015
+
+     state     since                    cpu    memory           disk
+#0   running   2015-02-13 04:01:50 PM   0.0%   389.1M of 512M   128.9M of 1G</pre>
+</div>
+</div>
+</li>
+<li>
+<p>And again, view the additional <code>app.update</code> event:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf events cf-scale-boot
+Getting events for app cf-scale-boot in org oreilly-class / space instructor as mstine@pivotal.io...
+
+time                          event                 actor               description
+2015-02-13T16:01:28.00-0600   audit.app.update      mstine@pivotal.io   state: STARTED
+2015-02-13T15:59:10.00-0600   audit.app.update      mstine@pivotal.io   state: STOPPED
+2015-02-13T15:18:33.00-0600   audit.app.update      mstine@pivotal.io   instances: 1
+2015-02-13T15:04:34.00-0600   audit.app.update      mstine@pivotal.io   instances: 5
+2015-02-13T12:56:35.00-0600   audit.app.update      mstine@pivotal.io   state: STARTED
+2015-02-13T12:56:26.00-0600   audit.app.update      mstine@pivotal.io
+2015-02-13T12:56:26.00-0600   audit.app.map-route   mstine@pivotal.io
+2015-02-13T12:56:24.00-0600   audit.app.create      mstine@pivotal.io   instances: 1, memory: 512, state: STOPPED, environment_json: PRIVATE DATA HIDDEN</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_logs">Logs</h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="_health">Health</h2>
+<div class="sectionbody">
+
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 16:08:32 CST
+Last updated 2015-02-13 16:09:29 CST
 </div>
 </div>
 </body>
