@@ -1,0 +1,21 @@
+= cf-scale-boot
+
+Demonstrate application instance scaling on Cloud Foundry with this simple (one Groovy file, one HTML file) Spring Boot CLI application!
+
+== Running on Cloud Foundry
+
+----
+$ cf push
+----
+
+== SCALE!
+
+----
+$ cf scale cf-scale-boot -i 1000
+----
+
+(_or some reasonable number for your CF cloud!_)
+
+== What you get:
+
+image::docs/screenshot.png[]
