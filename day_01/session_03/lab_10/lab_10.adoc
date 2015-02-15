@@ -1,1 +1,149 @@
+:compat-mode:
 = Lab 10 - Leveraging Spring Cloud Connectors for Service Binding
+
+In this lab we'll bind our RESTful web service from link:../lab_09/lab_09.html[Lab 9] to a PostgreSQL database and leverage Spring Cloud Connectors to easily connect to it.
+
+NOTE: The completed code for this lab can be found at `$COURSE_HOME/day_01/session_03/lab_10/complete/cities`.
+
+== Using Spring Cloud Connectors
+
+. Change to the lab directory (the initial state for this lab is the same as the completed state for link:../lab_09/lab_09.html[Lab 9], so you can choose to continue with that project if you like footnote:[However, please use the copy of `import.sql` found in the `lab_10/initial/cities/src/main/resources` directory. It is a subset of the original dataset, which is necessary because we are using a free tier database service on PWS.]):
++
+----
+$ cd $COURSE_HOME/day_01/session_03/lab_10/initial/cities
+----
+
+. At present we're still using the in-memory database. Let's connect to a PostgreSQL database service provided by http://www.elephantsql.com/[ElephantSQL].
+From the CLI, let's _create_ a free ElephantSQL service instance:
++
+[source,bash]
+----
+$ cf create-service elephantsql turtle cities-db
+Creating service cities-db...
+OK
+----
+
+. Next add the service to your application manifest, which will _bind_ the service to our application on the next push. We'll also add an environment variable to switch on the ``cloud'' profile,
++
+[source,yml]
+----
+---
+applications:
+- name: cities
+  memory: 512M
+  instances: 1
+  path: build/libs/cities-0.0.1-SNAPSHOT.jar
+  timeout: 180
+  services:                        # Add
+  - cities-db                      # these
+  env:                             # four
+    SPRING_PROFILES_ACTIVE: cloud  # lines
+----
++
+You can also accomplish the service binding by explicitly binding the service at the command-line:
++
+[source,bash]
+----
+$ cf bind-service cities cities-db
+Binding service cities-db to app cities...
+OK
+----
+
+. Next we'll add Spring Cloud and MySQL dependencies to our Gradle build. Comment or remove the +hsqldb+ line add add the following in the +dependencies+ section:
++
+[source,groovy]
+----
+dependencies {
+    // ....
+    compile("org.springframework.cloud:spring-cloud-spring-service-connector:1.1.0.RELEASE")
+    compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.1.0.RELEASE")
+    runtime("postgresql:postgresql:9.1-901-1.jdbc4")
+}
+----
++
+Since we've added new dependencies, re-run +./gradlew idea+ or +./gradlew eclipse+ to have them added to the IDE classpath.
+
+. Next, let's create the package +org.example.cities.config+ and create in that package the class +CloudDataSourceConfig+. Add the following code:
++
+[source,java]
+----
+@Profile("cloud")
+@Configuration
+public class CloudDataSourceConfig extends AbstractCloudConfig {
+    @Bean
+    public DataSource dataSource() {
+        return connectionFactory().dataSource();
+    }
+}
+----
++
+As before, have the IDE import the appropriate dependencies.
++
+The +@Profile+ annotation will cause this class (which becomes Spring configuration when annotated as +@Configuration+) to be added to the configuration set because of the +SPRING_PROFILES_ACTIVE+ environment variable we added earlier. You can still run the application locally (with the default profile) using the embedded database.
++
+With this code, Spring Cloud will detect a bound service that is compatible with +DataSource+, read the credentials, and then create a +DataSource+ as appropriate (it will throw an exception otherwise).
+
+. Add the following to +src/main/resources/application.properties+ to cause Hibernate to create the database schema and import data at startup. This is done automatically for embedded databases, not for custom ++DataSource++s. Other Hibernate native properties can be set in a similar fashion:
++
+[source,java]
+----
+spring.jpa.hibernate.ddl-auto=create
+----
+
+. Build the application:
++
+[source,bash]
+----
+$ ./gradlew assemble
+----
+
+. Re-push the application:
++
+[source,bash]
+----
+$ cf push
+----
+
+. Take a look at the +env+ endpoint again to see the service bound in +VCAP_SERVICES+:
++
+[source,bash]
+----
+$ curl http://cities-crouse-penance.cfapps.io/env
+...
+VCAP_SERVICES: "{"elephantsql":[{"name":"cities-db","label":"elephantsql","tags":["Data Stores","Cloud Databases","Developer Tools","Data Store","postgresql","relational","New Product"],"plan":"turtle","credentials":{"uri":"postgres://okoaxkll:Il2L3Z6vSywRw2kNKd4G997VAhd3c7gy@babar.elephantsql.com:5432/okoaxkll","max_conns":"5"}}]}",
+...
+----
+The application is now running against a PostgreSQL database.
+
+== Customizing the +DataSource+
+
+. You can customize the database connection that Spring Cloud creates with a few lines of code. Change the +dataSource+ method in +CloudDataSourceConfig+ to add some pooling and connection configuration:
++
+[source,java]
+----
+@Bean
+public DataSource dataSource() {
+    PooledServiceConnectorConfig.PoolConfig poolConfig =
+            new PooledServiceConnectorConfig.PoolConfig(5, 200);
+
+    DataSourceConfig.ConnectionConfig connectionConfig =
+            new DataSourceConfig.ConnectionConfig("characterEncoding=UTF-8");
+    DataSourceConfig serviceConfig = new DataSourceConfig(poolConfig, connectionConfig);
+
+    return connectionFactory().dataSource("cities-db", serviceConfig);
+}
+----
+
+. Build the application:
++
+[source,bash]
+----
+$ ./gradlew assemble
+----
+
+. Re-push the application:
++
+[source,bash]
+----
+$ cf push
+----

@@ -1,0 +1,12 @@
+---
+applications:
+- name: cities
+  host: cities-${random-word}
+  memory: 512M
+  instances: 1
+  path: build/libs/cities-0.0.1-SNAPSHOT.jar
+  timeout: 180 # to give time for the data to import
+  services:                        # Add
+  - cities-db                      # these
+  env:                             # four
+    SPRING_PROFILES_ACTIVE: cloud  # lines
