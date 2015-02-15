@@ -690,6 +690,18 @@ b.conum * { color: inherit !important; }
 <div class="paragraph">
 <p>In this lab we&#8217;ll utilize Spring Boot, Spring Data, and Spring Data REST to create a fully-functional hypermedia-driven RESTful web service. We&#8217;ll then deploy it to Cloud Foundry (using Pivotal Web Services).</p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The completed code for this lab can be found at <code>$COURSE_HOME/day_01/session_03/lab_09/complete/cities</code>.
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -698,48 +710,15 @@ b.conum * { color: inherit !important; }
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Browse to <a href="http://start.spring.io">Spring Initializr</a> and complete the form as follows:</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Group</dt>
-<dd>
-<p>org.example</p>
-</dd>
-<dt class="hdlist1">Artifact</dt>
-<dd>
-<p>cities</p>
-</dd>
-<dt class="hdlist1">Name</dt>
-<dd>
-<p>cities</p>
-</dd>
-<dt class="hdlist1">Description</dt>
-<dd>
-<p>Demo project</p>
-</dd>
-<dt class="hdlist1">Package name</dt>
-<dd>
-<p>org.example.cities</p>
-</dd>
-<dt class="hdlist1">Styles</dt>
-<dd>
-<p>Actuator, JPA, Rest Repositories, Web</p>
-</dd>
-<dt class="hdlist1">Type</dt>
-<dd>
-<p>Gradle project</p>
-</dd>
-</dl>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_01/session_03/lab_09/initial/cities</pre>
 </div>
-<div class="paragraph">
-<p>Then click <code>Generate</code>. This will result in a file called <code>cities.zip</code> being downloaded to your workstation.</p>
 </div>
 </li>
 <li>
-<p>Unzip <code>cities.zip</code> to a location of your choosing.</p>
-</li>
-<li>
-<p>Optionally generate project files for your favorite IDE by running <code>gradle idea</code> or <code>gradle eclipse</code>. Then open the project in your editor or IDE of choice.</p>
+<p>Optionally generate project files for your favorite IDE by running <code>./gradlew idea</code> or <code>./gradlew eclipse</code>. Then open the project in your editor or IDE of choice.</p>
 </li>
 <li>
 <p>Add a runtime dependency on the <a href="http://hsqldb.org/">HyperSQL in-memory database</a> to <code>build.gradle</code>:</p>
@@ -847,7 +826,7 @@ public class Application {
 <p>Build the application:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ gradle assemble</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ ./gradlew assemble</code></pre>
 </div>
 </div>
 </li>
@@ -910,7 +889,7 @@ Date: Tue, 27 May 2014 19:34:45 GMT
 <p>Build the application:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ gradle assemble</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ ./gradlew assemble</code></pre>
 </div>
 </div>
 </li>
@@ -1029,7 +1008,7 @@ Page&lt;City&gt; findByPostalCode(@Param("q") String postalCode, Pageable pageab
 <p>Build the application:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ gradle assemble</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ ./gradlew assemble</code></pre>
 </div>
 </div>
 </li>
@@ -1182,7 +1161,7 @@ urls: cities-undeliverable-iatrochemistry.cf.mycloud.com
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-15 07:26:14 PST
+Last updated 2015-02-15 08:08:21 PST
 </div>
 </div>
 </body>
