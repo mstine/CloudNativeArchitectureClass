@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.2">
+<meta name="generator" content="Asciidoctor 1.5.0.rc.2">
 <title>Lab 11 - Build a Product Search/Details Service using PostgreSQL</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
@@ -677,7 +677,6 @@ b.conum * { color: inherit !important; }
 .conum:not([data-value]):empty { display: none; }
 
 .literalblock pre, .listingblock pre { background: #eeeeee; }
-
 </style>
 </head>
 <body class="article">
@@ -713,7 +712,7 @@ The completed code for this lab can be found at <code>$COURSE_HOME/day_01/sessio
 </div>
 </div>
 <div class="sect1">
-<h2 id="_getting_started">Getting Started</h2>
+<h2 id="_developing_the_service">Developing the Service</h2>
 <div class="sectionbody">
 <div class="olist arabic">
 <ol class="arabic">
@@ -933,7 +932,7 @@ public class MovieController {
 </div>
 </li>
 <li>
-<p>Add the annotation to <code>io.springbox.catalog.SpringboxCatalogApplication</code>:</p>
+<p>Add the <code>@EnableJpaRepositories</code> annotation to <code>io.springbox.catalog.SpringboxCatalogApplication</code>:</p>
 <div class="listingblock">
 <div class="content">
 <pre>@SpringBootApplication
@@ -990,7 +989,216 @@ insert into movies_genres(movie_id, genre_id) values (1003,1008);</pre>
 </div>
 </li>
 <li>
-<p>Build and Run!</p>
+<p>Build the JAR:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/springbox-catalog-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Access the application using <code>curl</code> to make sure everything is working properly:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i localhost:8080/movies/1
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8Date: Mon, 16 Feb 2015 03:38:42 GMTServer: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: application
+
+{
+    "genres": [
+        {
+            "id": 1003,
+            "mlId": "3",
+            "name": "Animation"
+        },
+        {
+            "id": 1004,
+            "mlId": "4",
+            "name": "Children's"
+        },
+        {
+            "id": 1005,
+            "mlId": "5",
+            "name": "Comedy"
+        }
+    ],
+    "id": 1000,
+    "mlId": "1",
+    "title": "Toy Story (1995)"
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_preparing_for_cloud_foundry">Preparing for Cloud Foundry</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>We want to bind to a PostgreSQL data source when running on PWS, so let&#8217;s create one:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf cs elephantsql turtle springbox-catalog-db
+Creating service springbox-catalog-db in org oreilly-class / space instructor as mstine@pivotal.io...
+OK</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add the appropriate dependencies for PostgreSQL&#8217;s JDBC driver and the Spring Cloud Connectors:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;postgresql&lt;/groupId&gt;
+  &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
+  &lt;version&gt;9.1-901-1.jdbc4&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-cloudfoundry-connector&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-spring-service-connector&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Rename <code>src/main/resources/application.properties</code> file to <code>src/main/resources/application.yml</code> file.
+YAML files make it much easier to represent multiple Spring profiles.
+This will allow us to run locally with HSQLDB and on PWS with PostgreSQL.</p>
+</li>
+<li>
+<p>Paste the following into <code>application.yml</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+---
+
+spring:
+  profiles: default
+  jpa:
+    database: HSQL
+
+---
+
+spring:
+  profiles: cloud
+  jpa:
+    database: POSTGRESQL</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Rebuild the JAR:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_deploying_to_cloud_foundry">Deploying to Cloud Foundry</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create an application manifest in <code>manifest.yml</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="yml language-yml">---
+applications:
+- name: springbox-catalog
+  host: springbox-catalog-${random-word}
+  memory: 512M
+  instances: 1
+  path: target/springbox-catalog-0.0.1-SNAPSHOT.jar
+  env:
+    SPRING_PROFILES_ACTIVE: cloud
+  services:
+    - springbox-catalog-db</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Push to Cloud Foundry:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf push
+
+...
+
+Showing health and status for app springbox-catalog in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: springbox-catalog-overwild-nonrevival.cfapps.io
+last uploaded: Mon Feb 16 19:34:38 UTC 2015
+
+     state     since                    cpu    memory           disk
+#0   running   2015-02-16 11:36:05 AM   0.0%   401.5M of 512M   127.5M of 1G</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Access the application using <code>curl</code> at the random route provided by CF:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i springbox-catalog-overwild-nonrevival.cfapps.io/movies/1
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8Date: Mon, 16 Feb 2015 03:38:42 GMTServer: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: application
+
+{
+    "genres": [
+        {
+            "id": 1003,
+            "mlId": "3",
+            "name": "Animation"
+        },
+        {
+            "id": 1004,
+            "mlId": "4",
+            "name": "Children's"
+        },
+        {
+            "id": 1005,
+            "mlId": "5",
+            "name": "Comedy"
+        }
+    ],
+    "id": 1000,
+    "mlId": "1",
+    "title": "Toy Story (1995)"
+}</pre>
+</div>
+</div>
 </li>
 </ol>
 </div>
@@ -999,7 +1207,7 @@ insert into movies_genres(movie_id, genre_id) values (1003,1008);</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-15 14:04:33 PST
+Last updated 2015-02-16 11:42:07 PST
 </div>
 </div>
 </body>
