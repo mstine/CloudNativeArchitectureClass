@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.0.rc.2">
+<meta name="generator" content="Asciidoctor 1.5.2">
 <title>Lab 6 - Binding to Cloud Foundry Services</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
@@ -677,6 +677,7 @@ b.conum * { color: inherit !important; }
 .conum:not([data-value]):empty { display: none; }
 
 .literalblock pre, .listingblock pre { background: #eeeeee; }
+
 </style>
 </head>
 <body class="article">
@@ -743,11 +744,11 @@ The first is available on any instance of Cloud Foundry: the CLI. Just type:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>and you&#8217;ll get a list of services, their available plans, and descriptions. On Pivotal Web Services, the <code>&#8216;free&#8217;' tier of plans is normally the first one listed (e.g. `turtle</code> for <code>elephansql</code>).</p>
+<p>and you&#8217;ll get a list of services, their available plans, and descriptions. On Pivotal Web Services, the &#8220;free&#8221; tier of plans is normally the first one listed (e.g. <code>turtle</code> for <code>elephansql</code>).</p>
 </div>
 <div class="paragraph">
 <p>The second way is specific to PWS&#8217;s Application Manager UI.
-If you haven&#8217;t already, login to it by visiting <a href="http://console.run.pivotal.io">http://console.run.pivotal.io</a>.</p>
+If you haven&#8217;t already, login to it by visiting <a href="http://console.run.pivotal.io" class="bare">http://console.run.pivotal.io</a>.</p>
 </div>
 <div class="paragraph">
 <p>Click on the &#8220;Marketplace&#8221; link:</p>
@@ -869,7 +870,7 @@ Let&#8217;s take a look at the environment variables for our application to see 
 </div>
 </li>
 <li>
-<p><strong>(OPTIONAL STEPS)</strong> If you have a PostgreSQL GUI tool handy (you can download a free one at <a href="http://www.pgadmin.org/download">http://www.pgadmin.org/download</a>), you can also take a look at the <em>Spring Music</em> data directly in the database.</p>
+<p><strong>(OPTIONAL STEPS)</strong> If you have a PostgreSQL GUI tool handy (you can download a free one at <a href="http://www.pgadmin.org/download" class="bare">http://www.pgadmin.org/download</a>), you can also take a look at the <em>Spring Music</em> data directly in the database.</p>
 </li>
 <li>
 <p>In pgAdmin, create a new server connection and populate the properties with values from the URI in your <code>VCAP_SERVICES</code> environment variable (remember <code>cf env spring-muisc</code>!):</p>

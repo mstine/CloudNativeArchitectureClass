@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.0.rc.2">
+<meta name="generator" content="Asciidoctor 1.5.2">
 <title>Lab 10 - Leveraging Spring Cloud Connectors for Service Binding</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
@@ -677,6 +677,7 @@ b.conum * { color: inherit !important; }
 .conum:not([data-value]):empty { display: none; }
 
 .literalblock pre, .listingblock pre { background: #eeeeee; }
+
 </style>
 </head>
 <body class="article">
@@ -721,7 +722,7 @@ The completed code for this lab can be found at <code>$COURSE_HOME/day_01/sessio
 From the CLI, let&#8217;s <em>create</em> a free ElephantSQL service instance:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="bash language-bash">$ cf create-service elephantsql turtle cities-db
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ cf create-service elephantsql turtle cities-db
 Creating service cities-db...
 OK</code></pre>
 </div>
@@ -731,7 +732,7 @@ OK</code></pre>
 <p>Next add the service to your application manifest, which will <em>bind</em> the service to our application on the next push. We&#8217;ll also add an environment variable to switch on the &#8220;cloud&#8221; profile,</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="yml language-yml">---
+<pre class="highlight"><code class="language-yml" data-lang="yml">---
 applications:
 - name: cities
   memory: 512M
@@ -749,17 +750,17 @@ applications:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="bash language-bash">$ cf bind-service cities cities-db
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ cf bind-service cities cities-db
 Binding service cities-db to app cities...
 OK</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Next we&#8217;ll add Spring Cloud and MySQL dependencies to our Gradle build. Comment or remove the hsqldb line add add the following in the dependencies section:</p>
+<p>Next we&#8217;ll add Spring Cloud and MySQL dependencies to our Gradle build. Comment or remove the <code>hsqldb</code> line add add the following in the <code>dependencies</code> section:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="groovy language-groovy">dependencies {
+<pre class="highlight"><code class="language-groovy" data-lang="groovy">dependencies {
     // ....
     compile("org.springframework.cloud:spring-cloud-spring-service-connector:1.1.0.RELEASE")
     compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.1.0.RELEASE")
@@ -768,14 +769,14 @@ OK</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Since we&#8217;ve added new dependencies, re-run ./gradlew idea or ./gradlew eclipse to have them added to the IDE classpath.</p>
+<p>Since we&#8217;ve added new dependencies, re-run <code>./gradlew idea</code> or <code>./gradlew eclipse</code> to have them added to the IDE classpath.</p>
 </div>
 </li>
 <li>
-<p>Next, let&#8217;s create the package org.example.cities.config and create in that package the class CloudDataSourceConfig. Add the following code:</p>
+<p>Next, let&#8217;s create the package <code>org.example.cities.config</code> and create in that package the class <code>CloudDataSourceConfig</code>. Add the following code:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="java language-java">@Profile("cloud")
+<pre class="highlight"><code class="language-java" data-lang="java">@Profile("cloud")
 @Configuration
 public class CloudDataSourceConfig extends AbstractCloudConfig {
     @Bean
@@ -789,17 +790,17 @@ public class CloudDataSourceConfig extends AbstractCloudConfig {
 <p>As before, have the IDE import the appropriate dependencies.</p>
 </div>
 <div class="paragraph">
-<p>The @Profile annotation will cause this class (which becomes Spring configuration when annotated as @Configuration) to be added to the configuration set because of the SPRING_PROFILES_ACTIVE environment variable we added earlier. You can still run the application locally (with the default profile) using the embedded database.</p>
+<p>The <code>@Profile</code> annotation will cause this class (which becomes Spring configuration when annotated as <code>@Configuration</code>) to be added to the configuration set because of the <code>SPRING_PROFILES_ACTIVE</code> environment variable we added earlier. You can still run the application locally (with the default profile) using the embedded database.</p>
 </div>
 <div class="paragraph">
-<p>With this code, Spring Cloud will detect a bound service that is compatible with DataSource, read the credentials, and then create a DataSource as appropriate (it will throw an exception otherwise).</p>
+<p>With this code, Spring Cloud will detect a bound service that is compatible with <code>DataSource</code>, read the credentials, and then create a <code>DataSource</code> as appropriate (it will throw an exception otherwise).</p>
 </div>
 </li>
 <li>
-<p>Add the following to src/main/resources/application.properties to cause Hibernate to create the database schema and import data at startup. This is done automatically for embedded databases, not for custom DataSources. Other Hibernate native properties can be set in a similar fashion:</p>
+<p>Add the following to <code>src/main/resources/application.properties</code> to cause Hibernate to create the database schema and import data at startup. This is done automatically for embedded databases, not for custom <code>DataSource</code>s. Other Hibernate native properties can be set in a similar fashion:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="java language-java">spring.jpa.hibernate.ddl-auto=create</code></pre>
+<pre class="highlight"><code class="language-java" data-lang="java">spring.jpa.hibernate.ddl-auto=create</code></pre>
 </div>
 </div>
 </li>
@@ -807,7 +808,7 @@ public class CloudDataSourceConfig extends AbstractCloudConfig {
 <p>Build the application:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="bash language-bash">$ ./gradlew assemble</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ ./gradlew assemble</code></pre>
 </div>
 </div>
 </li>
@@ -815,15 +816,15 @@ public class CloudDataSourceConfig extends AbstractCloudConfig {
 <p>Re-push the application:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="bash language-bash">$ cf push</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ cf push</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Take a look at the env endpoint again to see the service bound in +VCAP_SERVICES+:</p>
+<p>Take a look at the <code>env</code> endpoint again to see the service bound in <code>VCAP_SERVICES</code>:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="bash language-bash">$ curl http://cities-crouse-penance.cfapps.io/env
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ curl http://cities-crouse-penance.cfapps.io/env
 ...
 VCAP_SERVICES: "{"elephantsql":[{"name":"cities-db","label":"elephantsql","tags":["Data Stores","Cloud Databases","Developer Tools","Data Store","postgresql","relational","New Product"],"plan":"turtle","credentials":{"uri":"postgres://okoaxkll:Il2L3Z6vSywRw2kNKd4G997VAhd3c7gy@babar.elephantsql.com:5432/okoaxkll","max_conns":"5"}}]}",
 ...</code></pre>
@@ -838,15 +839,15 @@ VCAP_SERVICES: "{"elephantsql":[{"name":"cities-db","label":"elephantsql","tags"
 </div>
 </div>
 <div class="sect1">
-<h2 id="_customizing_the_datasource">Customizing the DataSource</h2>
+<h2 id="_customizing_the_code_datasource_code">Customizing the <code>DataSource</code></h2>
 <div class="sectionbody">
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>You can customize the database connection that Spring Cloud creates with a few lines of code. Change the dataSource method in CloudDataSourceConfig to add some pooling and connection configuration:</p>
+<p>You can customize the database connection that Spring Cloud creates with a few lines of code. Change the <code>dataSource</code> method in <code>CloudDataSourceConfig</code> to add some pooling and connection configuration:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="java language-java">@Bean
+<pre class="highlight"><code class="language-java" data-lang="java">@Bean
 public DataSource dataSource() {
     PooledServiceConnectorConfig.PoolConfig poolConfig =
             new PooledServiceConnectorConfig.PoolConfig(5, 200);
@@ -864,7 +865,7 @@ public DataSource dataSource() {
 <p>Build the application:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="bash language-bash">$ ./gradlew assemble</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ ./gradlew assemble</code></pre>
 </div>
 </div>
 </li>
@@ -872,7 +873,7 @@ public DataSource dataSource() {
 <p>Re-push the application:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="bash language-bash">$ cf push</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ cf push</code></pre>
 </div>
 </div>
 </li>
