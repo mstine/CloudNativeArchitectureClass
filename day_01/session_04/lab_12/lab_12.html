@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.0.rc.2">
+<meta name="generator" content="Asciidoctor 1.5.2">
 <title>Lab 12 - Build a Product Review Service with MongoDB</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
@@ -677,6 +677,7 @@ b.conum * { color: inherit !important; }
 .conum:not([data-value]):empty { display: none; }
 
 .literalblock pre, .listingblock pre { background: #eeeeee; }
+
 </style>
 </head>
 <body class="article">
@@ -684,11 +685,366 @@ b.conum * { color: inherit !important; }
 <h1>Lab 12 - Build a Product Review Service with MongoDB</h1>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock abstract">
+<blockquote>
+<div class="paragraph">
+<p>In this lab we&#8217;ll begin the second subproject of our complete cloud-native application architecture: <em>SpringBox</em>, which implements the movie browsing portion of a &#8220;Redbox-like&#8221; website.
+This microservice will provide the <em>Movie Review Service</em>, which will allow us to create and browse reviews for movies.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;re still using the <a href="http://grouplens.org/datasets/movielens/">MovieLens</a> dataset, and here we&#8217;ll link back to movies in the dataset by their <code>mlId</code> or &#8220;MovieLens ID.&#8221;</p>
+</div>
+</blockquote>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The completed code for this lab can be found at <code>$COURSE_HOME/day_01/session_04/lab_12/complete/springbox-reviews</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_developing_the_service">Developing the Service</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_01/session_04/lab_12/initial/springbox-reviews</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and import the project (via <code>pom.xml</code>) into your IDE of choice.</p>
+</div>
+</li>
+<li>
+<p>Create the package <code>io.springbox.reviews.domain</code> and in that package create the class <code>Review</code>. Into that file you can paste the following source code:</p>
+<div class="listingblock">
+<div class="content">
+<pre>public class Review {
+    @Id
+    private String id;
 
+    @Indexed
+    private String mlId;
+
+    @Indexed
+    private String userName;
+
+    private String title;
+
+    private String review;
+
+    private int rating;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getMlId() {
+        return mlId;
+    }
+
+    public void setMlId(String mlId) {
+        this.mlId = mlId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getReview() {
+        return review;
+    }
+
+    public void setReview(String review) {
+        this.review = review;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the package <code>io.springbox.reviews.repositories</code> and in that package create the interface <code>ReviewRepository</code>. Into that file you can paste the following source code:</p>
+<div class="listingblock">
+<div class="content">
+<pre>public interface ReviewRepository extends MongoRepository&lt;Review, String&gt; {
+    Iterable&lt;Review&gt; findByMlId(String mlId);
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the package <code>io.springbox.reviews.controllers</code> and in that package create the interface <code>ReviewController</code>. Into that file you can paste the following source code:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@RestController
+public class ReviewController {
+
+    @Autowired
+    ReviewRepository reviewRepository;
+
+    @RequestMapping(value = "/reviews", method = RequestMethod.GET)
+    public Iterable&lt;Review&gt; reviews() {
+        return reviewRepository.findAll();
+    }
+
+    @RequestMapping(value = "/reviews/{mlId}", method = RequestMethod.GET)
+    public Iterable&lt;Review&gt; reviews(@PathVariable String mlId) {
+        return reviewRepository.findByMlId(mlId);
+    }
+
+    @RequestMapping(value = "/reviews", method = RequestMethod.POST)
+    public ResponseEntity&lt;Review&gt; createReview(@RequestBody Review review) {
+        reviewRepository.save(review);
+        return new ResponseEntity&lt;&gt;(review, HttpStatus.CREATED);
+    }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add the <code>@EnableMongoRepositories</code> annotation to <code>io.springbox.reviews.SpringboxReviewsApplication</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@SpringBootApplication
+@EnableMongoRepositories // &lt;--- Add this!
+public class SpringboxReviewsApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxReviewsApplication.class, args);
+    }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add the following to <code>application.properties</code>&#8201;&#8212;&#8201;we&#8217;ll eventually want to run multiple apps locally, so we need to change the port:</p>
+<div class="listingblock">
+<div class="content">
+<pre>server.port=8081</pre>
+</div>
+</div>
+</li>
+<li>
+<p>To run the application locally, you&#8217;ll need a local MongoDB install.
+You can download MongoDB for your platform <a href="http://www.mongodb.org/downloads">here</a>.
+If run locally with the default setup, the application will automatically discover it and connect to it.</p>
+</li>
+<li>
+<p>Build the JAR:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/springbox-reviews-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the following script to insert data via the application&#8217;s API:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ scripts/loadReviews.sh</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Access the application using <code>curl</code> to make sure everything is working properly:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i localhost:8081/reviews/1
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Date: Mon, 16 Feb 2015 22:53:26 GMT
+Server: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: application:8081
+
+[
+    {
+        "id": "54e26a97300487ae4fe4cf45",
+        "mlId": "1",
+        "rating": 5,
+        "review": "Great movie!",
+        "title": "Toy Story (1995)",
+        "userName": "mstine"
+    }
+]</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_preparing_for_cloud_foundry">Preparing for Cloud Foundry</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>We want to bind to a MongoLab data source when running on PWS, so let&#8217;s create one:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf cs mongolab sandbox springbox-reviews-db
+Creating service springbox-reviews-db in org oreilly-class / space instructor as mstine@pivotal.io...
+OK</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add the appropriate dependencies for the Spring Cloud Connectors:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-cloudfoundry-connector&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-spring-service-connector&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Rebuild the JAR:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_deploying_to_cloud_foundry">Deploying to Cloud Foundry</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create an application manifest in <code>manifest.yml</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yml" data-lang="yml">---
+applications:
+- name: springbox-reviews
+  host: springbox-reviews-${random-word}
+  memory: 512M
+  instances: 1
+  path: target/springbox-reviews-0.0.1-SNAPSHOT.jar
+  services:
+    - springbox-reviews-db</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Push to Cloud Foundry:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf push
+
+...
+
+Showing health and status for app springbox-reviews in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: springbox-reviews-understaffed-nickeltype.cfapps.io
+last uploaded: Mon Feb 16 23:04:42 UTC 2015
+
+     state     since                    cpu    memory           disk
+#0   running   2015-02-16 03:05:28 PM   0.0%   361.4M of 512M   115.7M of 1G</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the load script with the <code>ROUTE</code> environment variable set to the random route generated by CF to insert data via the application&#8217;s API:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ ROUTE=springbox-reviews-understaffed-nickeltype.cfapps.io scripts/loadReviews.sh</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Access the application using <code>curl</code> to make sure everything is working properly:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i springbox-reviews-understaffed-nickeltype.cfapps.io/reviews/1
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Date: Mon, 16 Feb 2015 22:53:26 GMT
+Server: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: application:8081
+
+[
+    {
+        "id": "54e26a97300487ae4fe4cf45",
+        "mlId": "1",
+        "rating": 5,
+        "review": "Great movie!",
+        "title": "Toy Story (1995)",
+        "userName": "mstine"
+    }
+]</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 14:14:50 PST
+Last updated 2015-02-16 15:13:14 PST
 </div>
 </div>
 </body>

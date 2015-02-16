@@ -1,1 +1,285 @@
+:compat-mode:
 = Lab 12 - Build a Product Review Service with MongoDB
+
+[abstract]
+--
+In this lab we'll begin the second subproject of our complete cloud-native application architecture: _SpringBox_, which implements the movie browsing portion of a ``Redbox-like'' website.
+This microservice will provide the _Movie Review Service_, which will allow us to create and browse reviews for movies.
+
+We're still using the http://grouplens.org/datasets/movielens/[MovieLens] dataset, and here we'll link back to movies in the dataset by their `mlId` or ``MovieLens ID.''
+--
+
+NOTE: The completed code for this lab can be found at `$COURSE_HOME/day_01/session_04/lab_12/complete/springbox-reviews`.
+
+== Developing the Service
+
+. Change to the lab directory:
++
+----
+$ cd $COURSE_HOME/day_01/session_04/lab_12/initial/springbox-reviews
+----
++
+and import the project (via `pom.xml`) into your IDE of choice.
+
+. Create the package `io.springbox.reviews.domain` and in that package create the class `Review`. Into that file you can paste the following source code:
++
+----
+public class Review {
+    @Id
+    private String id;
+
+    @Indexed
+    private String mlId;
+
+    @Indexed
+    private String userName;
+
+    private String title;
+
+    private String review;
+
+    private int rating;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getMlId() {
+        return mlId;
+    }
+
+    public void setMlId(String mlId) {
+        this.mlId = mlId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getReview() {
+        return review;
+    }
+
+    public void setReview(String review) {
+        this.review = review;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+}
+----
+
+. Create the package `io.springbox.reviews.repositories` and in that package create the interface `ReviewRepository`. Into that file you can paste the following source code:
++
+----
+public interface ReviewRepository extends MongoRepository<Review, String> {
+    Iterable<Review> findByMlId(String mlId);
+}
+----
+
+. Create the package `io.springbox.reviews.controllers` and in that package create the interface `ReviewController`. Into that file you can paste the following source code:
++
+----
+@RestController
+public class ReviewController {
+
+    @Autowired
+    ReviewRepository reviewRepository;
+
+    @RequestMapping(value = "/reviews", method = RequestMethod.GET)
+    public Iterable<Review> reviews() {
+        return reviewRepository.findAll();
+    }
+
+    @RequestMapping(value = "/reviews/{mlId}", method = RequestMethod.GET)
+    public Iterable<Review> reviews(@PathVariable String mlId) {
+        return reviewRepository.findByMlId(mlId);
+    }
+
+    @RequestMapping(value = "/reviews", method = RequestMethod.POST)
+    public ResponseEntity<Review> createReview(@RequestBody Review review) {
+        reviewRepository.save(review);
+        return new ResponseEntity<>(review, HttpStatus.CREATED);
+    }
+}
+----
+
+. Add the `@EnableMongoRepositories` annotation to `io.springbox.reviews.SpringboxReviewsApplication`:
++
+----
+@SpringBootApplication
+@EnableMongoRepositories // <--- Add this!
+public class SpringboxReviewsApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxReviewsApplication.class, args);
+    }
+}
+----
+
+. Add the following to `application.properties` -- we'll eventually want to run multiple apps locally, so we need to change the port:
++
+----
+server.port=8081
+----
+
+. To run the application locally, you'll need a local MongoDB install.
+You can download MongoDB for your platform http://www.mongodb.org/downloads[here].
+If run locally with the default setup, the application will automatically discover it and connect to it.
+
+. Build the JAR:
++
+----
+$ mvn package
+----
+
+. Run the application:
++
+----
+$ java -jar target/springbox-reviews-0.0.1-SNAPSHOT.jar
+----
+
+. Run the following script to insert data via the application's API:
++
+----
+$ scripts/loadReviews.sh
+----
+
+. Access the application using `curl` to make sure everything is working properly:
++
+----
+$ curl -i localhost:8081/reviews/1
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Date: Mon, 16 Feb 2015 22:53:26 GMT
+Server: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: application:8081
+
+[
+    {
+        "id": "54e26a97300487ae4fe4cf45",
+        "mlId": "1",
+        "rating": 5,
+        "review": "Great movie!",
+        "title": "Toy Story (1995)",
+        "userName": "mstine"
+    }
+]
+----
+
+== Preparing for Cloud Foundry
+
+. We want to bind to a MongoLab data source when running on PWS, so let's create one:
++
+----
+$ cf cs mongolab sandbox springbox-reviews-db
+Creating service springbox-reviews-db in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
+
+. Add the appropriate dependencies for the Spring Cloud Connectors:
++
+----
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-cloudfoundry-connector</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-spring-service-connector</artifactId>
+</dependency>
+----
+
+. Rebuild the JAR:
++
+----
+$ mvn package
+----
+
+== Deploying to Cloud Foundry
+
+. Create an application manifest in `manifest.yml`:
++
+[source,yml]
+----
+---
+applications:
+- name: springbox-reviews
+  host: springbox-reviews-${random-word}
+  memory: 512M
+  instances: 1
+  path: target/springbox-reviews-0.0.1-SNAPSHOT.jar
+  services:
+    - springbox-reviews-db
+----
+
+. Push to Cloud Foundry:
++
+----
+$ cf push
+
+...
+
+Showing health and status for app springbox-reviews in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: springbox-reviews-understaffed-nickeltype.cfapps.io
+last uploaded: Mon Feb 16 23:04:42 UTC 2015
+
+     state     since                    cpu    memory           disk
+#0   running   2015-02-16 03:05:28 PM   0.0%   361.4M of 512M   115.7M of 1G
+----
+
+. Run the load script with the `ROUTE` environment variable set to the random route generated by CF to insert data via the application's API:
++
+----
+$ ROUTE=springbox-reviews-understaffed-nickeltype.cfapps.io scripts/loadReviews.sh
+----
+
+. Access the application using `curl` to make sure everything is working properly:
++
+----
+$ curl -i springbox-reviews-understaffed-nickeltype.cfapps.io/reviews/1
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Date: Mon, 16 Feb 2015 22:53:26 GMT
+Server: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: application:8081
+
+[
+    {
+        "id": "54e26a97300487ae4fe4cf45",
+        "mlId": "1",
+        "rating": 5,
+        "review": "Great movie!",
+        "title": "Toy Story (1995)",
+        "userName": "mstine"
+    }
+]
+----
