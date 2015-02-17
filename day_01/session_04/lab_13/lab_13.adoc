@@ -1,1 +1,416 @@
+:compat-mode:
 = Lab 13 - Build a Product Recommendation Service with Neo4J
+
+[abstract]
+--
+In this lab we'll begin the second subproject of our complete cloud-native application architecture: _SpringBox_, which implements the movie browsing portion of a ``Redbox-like'' website.
+This microservice will provide the _Movie Recommendations Service_, which will allow us to create and browse reviews for movies.
+We'll be using Neo4J to model the relationship between people and the movies that they like.
+Neo4J provides a powerful graph query language called Cypher which will allow us to create a highly performant query that returns ``movies liked by people who liked the movie you're currently browsing.''
+
+[graphviz, graph_diagram, png, align="center"]
+....
+digraph {
+  rankdir=LR;
+  node [shape = circle];
+  "Person A" -> "Movie A" [ label = "Likes" ];
+  "Person A" -> "Movie B" [ label = "Likes" ];
+  "Person A" -> "Movie C" [ label = "Likes" ];
+  "Person B" -> "Movie B" [ label = "Likes" ];
+  "Person C" -> "Movie A" [ label = "Likes" ];
+  "Person C" -> "Movie C" [ label = "Likes" ];
+}
+....
+
+We're still using the http://grouplens.org/datasets/movielens/[MovieLens] dataset, and here we'll link back to movies in the dataset by their `mlId` or ``MovieLens ID.''
+
+This project comes with vendored source for a Spring Cloud Connector for Neo4J, as that connector has not yet been released as part of the core project.
+--
+
+NOTE: The completed code for this lab can be found at `$COURSE_HOME/day_01/session_04/lab_13/complete/springbox-recommendations`.
+
+== Developing the Service
+
+. Change to the lab directory:
++
+----
+$ cd $COURSE_HOME/day_01/session_04/lab_13/initial/springbox-recommendations
+----
++
+and import the project (via `pom.xml`) into your IDE of choice.
+
+. Create the package `io.springbox.recommendations.domain` and in that package create the class `Movie`. Into that file you can paste the following source code:
++
+----
+@NodeEntity
+public class Movie {
+
+    @GraphId
+    private Long id;
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "id=" + id +
+                ", mlId='" + mlId + '\'' +
+                ", title='" + title + '\'' +
+                '}';
+    }
+
+    @Indexed(unique = true)
+    private String mlId;
+    private String title;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getMlId() {
+        return mlId;
+    }
+
+    public void setMlId(String mlId) {
+        this.mlId = mlId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+}
+----
+
+. Also in the package `io.springbox.recommendations.domain` create the class `Person`. Into that file you can paste the following source code:
++
+----
+@NodeEntity
+public class Person {
+
+    @GraphId
+    private Long id;
+    private String userName;
+    private String firstName;
+    private String lastName;
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", userName='" + userName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                '}';
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+}
+----
+
+. Also in the package `io.springbox.recommendations.domain` create the class `Likes`. Into that file you can paste the following source code:
++
+----
+@RelationshipEntity(type = "LIKES")
+public class Likes {
+
+    @GraphId
+    private Long id;
+
+    @StartNode
+    private Person person;
+
+    @EndNode
+    private Movie movie;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
+    public Movie getMovie() {
+        return movie;
+    }
+
+    public void setMovie(Movie movie) {
+        this.movie = movie;
+    }
+
+    @Override
+    public String toString() {
+        return "Likes{" +
+                "id=" + id +
+                ", person=" + person +
+                ", movie=" + movie +
+                '}';
+    }
+}
+----
+
+. Create the package `io.springbox.recommendations.repositories` and in that package create the interface `MovieRepository`. Into that file you can paste the following source code:
++
+----
+public interface MovieRepository extends GraphRepository<Movie> {
+    Movie findByMlId(String mlId);
+
+    @Query("MATCH (p:Person) WHERE p.userName = {0} MATCH p-[:LIKES]->movie<-[:LIKES]-slm-[:LIKES]->recommendations " +
+    "WHERE not(p = slm) and not (p--recommendations) return recommendations")
+    Iterable<Movie> recommendedMoviesFor(String userName);
+
+    @Query("MATCH (movie:Movie) WHERE movie.mlId = {0} MATCH movie<-[:LIKES]-slm-[:LIKES]->recommendations " +
+    "RETURN distinct recommendations")
+    Iterable<Movie> moviesLikedByPeopleWhoLiked(String mlId);
+}
+----
+
+. Also in the package `io.springbox.recommendations.repositories` create the interface `PersonRepository`. Into that file you can paste the following source code:
++
+----
+public interface PersonRepository extends GraphRepository<Person> {
+    Person findByUserName(String userName);
+}
+----
+
+. Also in the package `io.springbox.recommendations.repositories` create the interface `LikesRepository`. Into that file you can paste the following source code:
++
+----
+public interface LikesRepository extends GraphRepository<Likes> {
+}
+----
+
+. Create the package `io.springbox.recommendations.controllers` and in that package create the class `MovieController`. Into that file you can paste the following source code:
++
+----
+@RestController
+public class MovieController {
+
+    @Autowired
+    MovieRepository movieRepository;
+
+    @RequestMapping(value = "/movies", method = RequestMethod.GET)
+    public Iterable<Movie> movies() {
+        return movieRepository.findAll();
+    }
+
+    @RequestMapping(value = "/movies", method = RequestMethod.POST)
+    public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
+        movieRepository.save(movie);
+        return new ResponseEntity<>(movie, HttpStatus.CREATED);
+    }
+}
+----
+
+. Also in the package `io.springbox.recommendations.controllers` create the class `PersonController`. Into that file you can paste the following source code:
++
+----
+@RestController
+public class PersonController {
+
+    @Autowired
+    PersonRepository personRepository;
+
+    @RequestMapping(value = "/people", method = RequestMethod.GET)
+    public Iterable<Person> people() {
+        return personRepository.findAll();
+    }
+
+    @RequestMapping(value = "/people", method = RequestMethod.POST)
+    public ResponseEntity<Person> createPerson(@RequestBody Person person) {
+        personRepository.save(person);
+        return new ResponseEntity<>(person, HttpStatus.CREATED);
+    }
+
+}
+----
+
+. Also in the package `io.springbox.recommendations.controllers` create the class `LikesController`. Into that file you can paste the following source code:
++
+----
+@RestController
+public class LikesController {
+
+    @Autowired
+    LikesRepository likesRepository;
+
+    @RequestMapping(value = "/likes", method = RequestMethod.GET)
+    public Iterable<Likes> likes() {
+        return likesRepository.findAll();
+    }
+}
+----
+
+. Also in the package `io.springbox.recommendations.controllers` create the class `RecommendationsController`. Into that file you can paste the following source code:
++
+----
+@RestController
+public class RecommendationsController {
+
+    @Autowired
+    MovieRepository movieRepository;
+    @Autowired
+    PersonRepository personRepository;
+    @Autowired
+    LikesRepository likesRepository;
+
+    @RequestMapping(value = "/recommendations/{userName}/likes/{mlId}", method = RequestMethod.POST)
+    public ResponseEntity<Likes> createPersonMovieLink(@PathVariable String userName,
+                                                       @PathVariable String mlId) {
+        Person person = personRepository.findByUserName(userName);
+        Movie movie = movieRepository.findByMlId(mlId);
+
+        Likes likes = new Likes();
+        likes.setPerson(person);
+        likes.setMovie(movie);
+        likesRepository.save(likes);
+
+        return new ResponseEntity<>(likes, HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/recommendations/forUser/{userName}", method = RequestMethod.GET)
+    public Iterable<Movie> recommendedMoviesForUser(@PathVariable String userName) {
+        return movieRepository.recommendedMoviesFor(userName);
+    }
+
+    @RequestMapping(value = "/recommendations/forMovie/{mlId}", method = RequestMethod.GET)
+    public Iterable<Movie> recommendedMoviesForMovie(@PathVariable String mlId) {
+        return movieRepository.moviesLikedByPeopleWhoLiked(mlId);
+    }
+}
+----
+
+. Create the package `io.springbox.recommendations.config` and in that package create the class `Neo4jConfig`. Into that file you can paste the following source code:
++
+----
+@Configuration
+public class Neo4jConfig extends Neo4jConfiguration {
+    public Neo4jConfig() {
+        setBasePackage("io.springbox.recommendations.domain");
+    }
+}
+----
+
+. Also in the package `io.springbox.recommendations.config` create the class `LocalConfig`. Into that file you can paste the following source code:
++
+----
+@Configuration
+@Profile("default")
+public class LocalConfig {
+
+    @Bean
+    public GraphDatabaseService graphDatabaseService() {
+        return new SpringCypherRestGraphDatabase("http://localhost:7474/db/data/");
+    }
+
+}
+----
+
+. Add the `@EnableNeo4jRepositories` annotation to `io.springbox.recommendations.SpringboxRecommendationsApplication`:
++
+----
+@SpringBootApplication
+@EnableNeo4jRepositories(basePackages = "io.springbox.recommendations.repositories") // <--- Add this!
+public class SpringboxRecommendationsApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxRecommendationsApplication.class, args);
+    }
+}
+----
+
+. Add the following to `application.properties` -- we'll eventually want to run multiple apps locally, so we need to change the port:
++
+----
+server.port=8082
+----
+
+. To run the application locally, you'll need a local Neo4J install.
+You can download the Neo4J Community Edition http://neo4j.com/download/[here].
+
+. Build the JAR:
++
+----
+$ mvn package
+----
+
+. Run the application:
++
+----
+$ java -jar target/springbox-recommendations-0.0.1-SNAPSHOT.jar
+----
+
+. Run the following script to insert data via the application's API:
++
+----
+$ scripts/loadGraph.sh
+----
+
+. Access the application using `curl` to make sure everything is working properly:
++
+----
+$ curl -i ocalhost:8082/recommendations/forMovie/1
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Date: Tue, 17 Feb 2015 02:05:26 GMT
+Server: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: application:8082
+
+[
+    {
+        "id": 1039,
+        "mlId": "2",
+        "title": "GoldenEye (1995)"
+    },
+    {
+        "id": 1038,
+        "mlId": "1",
+        "title": "Toy Story (1995)"
+    }
+]
+----
