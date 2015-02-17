@@ -396,21 +396,16 @@ $ scripts/loadGraph.sh
 $ curl -i localhost:8082/recommendations/forMovie/1
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Date: Tue, 17 Feb 2015 02:05:26 GMT
+Date: Tue, 17 Feb 2015 06:02:10 GMT
 Server: Apache-Coyote/1.1
 Transfer-Encoding: chunked
 X-Application-Context: application:8082
 
 [
     {
-        "id": 1039,
+        "id": 3079,
         "mlId": "2",
         "title": "GoldenEye (1995)"
-    },
-    {
-        "id": 1038,
-        "mlId": "1",
-        "title": "Toy Story (1995)"
     }
 ]
 ----
