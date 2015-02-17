@@ -1,5 +1,15 @@
 #!/bin/bash
-URI="your graphenedb host"
-USERNAME="your graphenedb username"
-PASSWORD="your graphenedb password"
-cf cups recommendations-dba -p '{"neo4jUri":"${URI}","neo4jUsername":"${USERNAME}","neo4jPassword":"${PASSWORD}"}'
+URL="http://springboxrecommendationsdb.sb02.stations.graphenedb.com:24789/db/data/"
+USERNAME="springbox_recommendations_db"
+PASSWORD="NQEgMqK3WVNZn3mTK4XF"
+
+X=$IFS
+IFS='/'
+
+TOKENS=( $URL )
+SEC_URL=${TOKENS[0]}//${USERNAME}:${PASSWORD}@${TOKENS[2]}/${TOKENS[3]}/${TOKENS[4]}
+
+IFS=$X
+
+JSON=`printf '{"neo4jUri":"%s"}' $SEC_URL`
+cf cups springbox-recommendations-db -p ${JSON}
