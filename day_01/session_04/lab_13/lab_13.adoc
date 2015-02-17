@@ -393,7 +393,7 @@ $ scripts/loadGraph.sh
 . Access the application using `curl` to make sure everything is working properly:
 +
 ----
-$ curl -i ocalhost:8082/recommendations/forMovie/1
+$ curl -i localhost:8082/recommendations/forMovie/1
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
 Date: Tue, 17 Feb 2015 02:05:26 GMT
