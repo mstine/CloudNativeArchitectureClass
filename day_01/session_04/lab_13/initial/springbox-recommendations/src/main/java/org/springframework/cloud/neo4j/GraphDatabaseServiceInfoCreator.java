@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class GraphDatabaseServiceInfoCreator extends CloudFoundryServiceInfoCreator<GraphDatabaseServiceInfo> {
     public GraphDatabaseServiceInfoCreator() {
-        super(new Tags("pivotal", "org/springframework/cloud/neo4j"));
+        super(new Tags("pivotal", "neo4j"), "neo4j");
     }
 
     @Override
