@@ -685,11 +685,277 @@ b.conum * { color: inherit !important; }
 <h1>Lab 15 - Refreshing Configuration with Spring Cloud Bus</h1>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock abstract">
+<blockquote>
+<div class="paragraph">
+<p>The <a href="http://cloud.spring.io/spring-cloud-bus/">Spring Cloud Bus</a> links nodes in a distributed system with a lightweight message bus.
+We&#8217;ll use it, combined with a Spring bean scope called <code>@RefreshScope</code>, to broadcast configuration changes to our microservices.
+The bus will be backed by a running instance of <a href="http://www.rabbitmq.com/">RabbitMQ</a>.</p>
+</div>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_adding_the_cloud_bus_to_the_test_config_client">Adding the Cloud Bus to the Test Config Client</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_02/session_05/lab_15/initial/springbox-config-client</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and import the project (via <code>pom.xml</code>) into your IDE of choice.</p>
+</div>
+</li>
+<li>
+<p>In <code>pom.xml</code>, add a dependency on <code>spring-cloud-starter-bus-amqp</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-starter-bus-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In the package <code>io.springbox.configclient</code>, create the class <code>Greeter</code> and paste in the following source code:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@Component
+@RefreshScope
+public class Greeter {
 
+    @Value("${greeting}")
+    private String greeting;
+
+    public String getGreeting() {
+        return greeting;
+    }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Edit <code>GreetingController</code>, replacing the injected value for <code>greeting</code> with an injected instance of <code>Greeter</code>.
+Use that instance to obtain the greeting for the <code>greeter</code> request method.
+You can paste the following code to accomplish this:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@RestController
+public class GreetingController {
+
+    @Autowired
+    Greeter greeter;
+
+    @RequestMapping("/")
+    public String greeter() {
+        return greeter.getGreeting() + " World!";
+    }
+
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>To run the application now, you&#8217;ll need a local install of RabbitMQ. You can obtain one for your platform <a href="http://www.rabbitmq.com/download.html">here</a>.</p>
+</li>
+<li>
+<p>A completed <code>springbox-config-server</code> project has been placed in <code>$COURSE_HOME/day_02/session_05/lab_15/initial/springbox-config-server</code> for your convenience.
+In a different terminal window, change to that directory, rebuild, and run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_02/session_05/lab_15/initial/springbox-config-server
+$ mvn packaage
+$ java -jar target/springbox-config-server-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build your new <code>springbox-config-client</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/springbox-config-client-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Use <code>curl</code> to access the application and make sure that everything is still working as before:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i localhost:8080
+HTTP/1.1 200 OK
+Content-Length: 12
+Content-Type: text/plain;charset=UTF-8
+Date: Wed, 18 Feb 2015 21:48:32 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: demo
+
+Howdy World!</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In a separate terminal window, run another copy of the client on a different port to create a system of apps connected by the bus:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ SERVER_PORT=8081 java -jar target/springbox-config-client-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Use <code>curl</code> to access the second instance running on port <code>8081</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i localhost:8081
+HTTP/1.1 200 OK
+Content-Length: 12
+Content-Type: text/plain;charset=UTF-8
+Date: Wed, 18 Feb 2015 21:48:32 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: demo
+
+Howdy World!</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Now, open <code>demo.yml</code> from your config-repo and change the greeting:</p>
+<div class="listingblock">
+<div class="content">
+<pre>greeting: Ohai</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Stage, commit, and push your changes:</p>
+<div class="listingblock">
+<div class="content">
+<pre>git add . &amp;&amp; git commit -m "swap greeting" &amp;&amp; git push origin master</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using <code>curl</code>, test and see that the config server has updated with your new greeting:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i localhost:8888/demo/default
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 21:58:34 GMT
+Server: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: bootstrap:8888
+
+{
+    "label": "",
+    "name": "default",
+    "propertySources": [
+        {
+            "name": "https://github.com/mstine/springbox-config-repo.git/demo.yml",
+            "source": {
+                "greeting": "Ohai"
+            }
+        },
+        {
+            "name": "https://github.com/mstine/springbox-config-repo.git/application.yml",
+            "source": {
+                "configserver": true
+            }
+        }
+    ]
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using <code>curl</code>, show that the greeting <strong>has not</strong> refreshed in the client applications:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i localhost:8080
+HTTP/1.1 200 OK
+Content-Length: 12
+Content-Type: text/plain;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:00:11 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: demo
+
+Howdy World!
+
+$ curl -i localhost:8081
+HTTP/1.1 200 OK
+Content-Length: 12
+Content-Type: text/plain;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:00:16 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: demo:8081
+
+Howdy World!</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Now, <code>POST</code> a request to the <code>/bus/refresh</code> endpoint to trigger a configuration refresh event:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i -X POST localhost:8080/bus/refresh
+HTTP/1.1 200 OK
+Content-Length: 0
+Date: Wed, 18 Feb 2015 22:01:39 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: demo</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using <code>curl</code>, show that the greeting <strong>has</strong> now refreshed in the client applications:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i localhost:8080
+HTTP/1.1 200 OK
+Content-Length: 11
+Content-Type: text/plain;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:02:31 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: demo
+
+Ohai World!
+
+$ curl -i localhost:8081
+HTTP/1.1 200 OK
+Content-Length: 11
+Content-Type: text/plain;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:02:35 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: demo:8081
+
+Ohai World!</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 14:33:45 PST
+Last updated 2015-02-18 14:03:58 PST
 </div>
 </div>
 </body>
