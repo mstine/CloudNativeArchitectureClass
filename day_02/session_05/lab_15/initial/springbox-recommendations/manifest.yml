@@ -1,0 +1,12 @@
+---
+applications:
+- name: springbox-recommendations
+  host: springbox-recommendations-${random-word}
+  memory: 512M
+  instances: 1
+  path: target/springbox-recommendations-0.0.1-SNAPSHOT.jar
+  env:
+    SPRING_PROFILES_ACTIVE: cloud
+  services:
+  - springbox-recommendations-db
+  - springbox-config-service

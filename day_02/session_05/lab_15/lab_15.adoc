@@ -219,3 +219,277 @@ X-Application-Context: demo:8081
 
 Ohai World!
 ----
+
+== Update the Microservices to Use the Cloud Bus
+
+. Create a http://www.cloudamqp.com/[CloudAMQP] service to back the Cloud Bus:
++
+----
+$ cf cs cloudamqp tiger springbox-cloud-bus-amqp
+Creating service springbox-cloud-bus-amqp in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+Attention: The plan `tiger` of service `cloudamqp` is not free.  The instance `springbox-cloud-bus-amqp` will incur a cost.  Contact your administrator if you think this is in error.
+----
++
+Do not worry about the cost, as the class is sponsoring the CF organization we're using and will cover the service costs.
+
+. In your config repo, update the file `application.yml`, adding a new property:
++
+----
+configserver: true
+bus: false
+----
++
+We'll use the refresh of this property in each of our microservices' environments to verify that the cloud bus is working.
+
+. Stage, commit, and push your changes:
++
+----
+git add . && git commit -m "add bus property" && git push origin master
+----
+
+. Access the config server using `curl` to make sure the new property exists:
++
+----
+$ curl -i springbox-config-server-unmaritime-acidification.cfapps.io/application/default
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 171
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:22:04 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-config-server:cloud:61062
+X-Cf-Requestid: 296e2979-be5b-4cc6-4995-f1333be2be61
+
+{
+    "label": "",
+    "name": "default",
+    "propertySources": [
+        {
+            "name": "https://github.com/mstine/springbox-config-repo.git/application.yml",
+            "source": {
+                "bus": false,
+                "configserver": true
+            }
+        }
+    ]
+}
+----
+
+Each of the three microservice projects has been copied into `$COURSE_HOME/day_02/session_05/lab_15/initial`, and are in the state we left them at the end of link:../lab_14/lab_14.adoc[Lab 14].
+You can either continue your existing projects or pickup from these copies.
+
+For each project, perform the following steps (we'll do these once for the `springbox-catalog` project in this guide):
+
+. In `pom.xml`, add a dependency on `spring-cloud-starter-bus-amqp`:
++
+----
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-bus-amqp</artifactId>
+</dependency>
+----
+
+. In `manifest.yml`, add a binding to `springbox-cloud-bus-amqp`:
++
+----
+---
+applications:
+- name: springbox-catalog
+  host: springbox-catalog-${random-word}
+  memory: 512M
+  instances: 1
+  timeout: 90
+  path: target/springbox-catalog-0.0.1-SNAPSHOT.jar
+  env:
+    SPRING_PROFILES_ACTIVE: cloud
+  services:
+    - springbox-catalog-db
+    - springbox-config-service
+    - springbox-cloud-bus-amqp   # <-- ADD THIS!
+----
+
+. Build the JAR:
++
+----
+$ mvn package
+----
+
+. Push the application:
++
+----
+$ cf push
+
+...
+
+Showing health and status for app springbox-catalog in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: springbox-catalog-overwild-nonrevival.cfapps.io
+last uploaded: Wed Feb 18 22:36:12 UTC 2015
+
+     state     since                    cpu    memory           disk
+#0   running   2015-02-18 02:37:41 PM   0.0%   436.6M of 512M   140.2M of 1G
+----
+
+. Verify the existence of our new `bus` property using `curl`:
++
+----
+curl -i springbox-catalog-overwild-nonrevival.cfapps.io/env
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:38:29 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-catalog:cloud:61072
+X-Cf-Requestid: 57270766-2096-491b-4947-2cd062f3447f
+transfer-encoding: chunked
+
+{
+
+...
+
+"configService:https://github.com/mstine/springbox-config-repo.git/application.yml": {
+  "bus": false,
+  "configserver": true
+},
+
+...
+
+}
+----
+
+Once you've completed these steps for all three microservices, we'll update the `bus` property to `true` and trigger a refresh across all three applications.
+
+. Open `application.yml` from your config-repo and change the `bus` property to true:
++
+----
+configserver: true
+bus: true
+----
+
+. Stage, commit, and push your changes:
++
+----
+git add . && git commit -m "change bus to true" && git push origin master
+----
+
+. Using `curl`, test and see that the config server has updated with your new greeting:
++
+----
+curl -i springbox-config-server-unmaritime-acidification.cfapps.io/application/default
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 170
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:52:27 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-config-server:cloud:61062
+X-Cf-Requestid: c36caede-530c-487c-4175-fe2294f50248
+
+{
+    "label": "",
+    "name": "default",
+    "propertySources": [
+        {
+            "name": "https://github.com/mstine/springbox-config-repo.git/application.yml",
+            "source": {
+                "bus": true,
+                "configserver": true
+            }
+        }
+    ]
+}
+----
+
+. Using `curl`, `POST` a refresh event to the `springbox-catalog` service:
++
+----
+$ curl -i -X POST springbox-catalog-overwild-nonrevival.cfapps.io/bus/refresh
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+Date: Wed, 18 Feb 2015 22:53:51 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-catalog:cloud:61072
+X-Cf-Requestid: 6ef3bcde-1a76-40db-6822-5794bfc9c586
+Content-Length: 0
+Connection: keep-alive
+----
+
+. Using `curl`, verify that `bus` has updated to `true` across all three services:
++
+----
+$ curl -i springbox-catalog-overwild-nonrevival.cfapps.io/env
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:55:13 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-catalog:cloud:61072
+X-Cf-Requestid: 9d40141a-48b5-417b-4d0e-6d206329fac7
+transfer-encoding: chunked
+
+{
+
+...
+
+"configService:https://github.com/mstine/springbox-config-repo.git/application.yml": {
+  "bus": true,
+  "configserver": true
+},
+
+...
+
+}
+
+$ curl -i springbox-recommendations-preadherent-werewolf.cfapps.io/env
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:57:22 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-recommendations:cloud:61098
+X-Cf-Requestid: 37ec48c2-f46a-4011-73dc-a0eecf1abf7d
+transfer-encoding: chunked
+
+{
+
+...
+
+"configService:https://github.com/mstine/springbox-config-repo.git/application.yml": {
+  "bus": true,
+  "configserver": true
+},
+
+...
+
+}
+
+$ http springbox-reviews-understaffed-nickeltype.cfapps.io/env
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:58:08 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-reviews:cloud:61086
+X-Cf-Requestid: 6bdc2cd6-4225-40d3-5125-62c8809f0205
+transfer-encoding: chunked
+
+{
+
+...
+
+"configService:https://github.com/mstine/springbox-config-repo.git/application.yml": {
+  "bus": true,
+  "configserver": true
+},
+
+...
+
+}
+
+----

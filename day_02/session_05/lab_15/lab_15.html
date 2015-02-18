@@ -952,10 +952,331 @@ Ohai World!</pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_update_the_microservices_to_use_the_cloud_bus">Update the Microservices to Use the Cloud Bus</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a <a href="http://www.cloudamqp.com/">CloudAMQP</a> service to back the Cloud Bus:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf cs cloudamqp tiger springbox-cloud-bus-amqp
+Creating service springbox-cloud-bus-amqp in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+Attention: The plan `tiger` of service `cloudamqp` is not free.  The instance `springbox-cloud-bus-amqp` will incur a cost.  Contact your administrator if you think this is in error.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Do not worry about the cost, as the class is sponsoring the CF organization we&#8217;re using and will cover the service costs.</p>
+</div>
+</li>
+<li>
+<p>In your config repo, update the file <code>application.yml</code>, adding a new property:</p>
+<div class="listingblock">
+<div class="content">
+<pre>configserver: true
+bus: false</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll use the refresh of this property in each of our microservices' environments to verify that the cloud bus is working.</p>
+</div>
+</li>
+<li>
+<p>Stage, commit, and push your changes:</p>
+<div class="listingblock">
+<div class="content">
+<pre>git add . &amp;&amp; git commit -m "add bus property" &amp;&amp; git push origin master</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Access the config server using <code>curl</code> to make sure the new property exists:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i springbox-config-server-unmaritime-acidification.cfapps.io/application/default
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 171
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:22:04 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-config-server:cloud:61062
+X-Cf-Requestid: 296e2979-be5b-4cc6-4995-f1333be2be61
+
+{
+    "label": "",
+    "name": "default",
+    "propertySources": [
+        {
+            "name": "https://github.com/mstine/springbox-config-repo.git/application.yml",
+            "source": {
+                "bus": false,
+                "configserver": true
+            }
+        }
+    ]
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Each of the three microservice projects has been copied into <code>$COURSE_HOME/day_02/session_05/lab_15/initial</code>, and are in the state we left them at the end of <a href="../lab_14/lab_14.adoc">Lab 14</a>.
+You can either continue your existing projects or pickup from these copies.</p>
+</div>
+<div class="paragraph">
+<p>For each project, perform the following steps (we&#8217;ll do these once for the <code>springbox-catalog</code> project in this guide):</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>In <code>pom.xml</code>, add a dependency on <code>spring-cloud-starter-bus-amqp</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-starter-bus-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In <code>manifest.yml</code>, add a binding to <code>springbox-cloud-bus-amqp</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>---
+applications:
+- name: springbox-catalog
+  host: springbox-catalog-${random-word}
+  memory: 512M
+  instances: 1
+  timeout: 90
+  path: target/springbox-catalog-0.0.1-SNAPSHOT.jar
+  env:
+    SPRING_PROFILES_ACTIVE: cloud
+  services:
+    - springbox-catalog-db
+    - springbox-config-service
+    - springbox-cloud-bus-amqp   # &lt;-- ADD THIS!</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the JAR:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Push the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf push
+
+...
+
+Showing health and status for app springbox-catalog in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: springbox-catalog-overwild-nonrevival.cfapps.io
+last uploaded: Wed Feb 18 22:36:12 UTC 2015
+
+     state     since                    cpu    memory           disk
+#0   running   2015-02-18 02:37:41 PM   0.0%   436.6M of 512M   140.2M of 1G</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify the existence of our new <code>bus</code> property using <code>curl</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>curl -i springbox-catalog-overwild-nonrevival.cfapps.io/env
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:38:29 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-catalog:cloud:61072
+X-Cf-Requestid: 57270766-2096-491b-4947-2cd062f3447f
+transfer-encoding: chunked
+
+{
+
+...
+
+"configService:https://github.com/mstine/springbox-config-repo.git/application.yml": {
+  "bus": false,
+  "configserver": true
+},
+
+...
+
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Once you&#8217;ve completed these steps for all three microservices, we&#8217;ll update the <code>bus</code> property to <code>true</code> and trigger a refresh across all three applications.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Open <code>application.yml</code> from your config-repo and change the <code>bus</code> property to true:</p>
+<div class="listingblock">
+<div class="content">
+<pre>configserver: true
+bus: true</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Stage, commit, and push your changes:</p>
+<div class="listingblock">
+<div class="content">
+<pre>git add . &amp;&amp; git commit -m "change bus to true" &amp;&amp; git push origin master</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using <code>curl</code>, test and see that the config server has updated with your new greeting:</p>
+<div class="listingblock">
+<div class="content">
+<pre>curl -i springbox-config-server-unmaritime-acidification.cfapps.io/application/default
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 170
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:52:27 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-config-server:cloud:61062
+X-Cf-Requestid: c36caede-530c-487c-4175-fe2294f50248
+
+{
+    "label": "",
+    "name": "default",
+    "propertySources": [
+        {
+            "name": "https://github.com/mstine/springbox-config-repo.git/application.yml",
+            "source": {
+                "bus": true,
+                "configserver": true
+            }
+        }
+    ]
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using <code>curl</code>, <code>POST</code> a refresh event to the <code>springbox-catalog</code> service:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i -X POST springbox-catalog-overwild-nonrevival.cfapps.io/bus/refresh
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+Date: Wed, 18 Feb 2015 22:53:51 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-catalog:cloud:61072
+X-Cf-Requestid: 6ef3bcde-1a76-40db-6822-5794bfc9c586
+Content-Length: 0
+Connection: keep-alive</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using <code>curl</code>, verify that <code>bus</code> has updated to <code>true</code> across all three services:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i springbox-catalog-overwild-nonrevival.cfapps.io/env
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:55:13 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-catalog:cloud:61072
+X-Cf-Requestid: 9d40141a-48b5-417b-4d0e-6d206329fac7
+transfer-encoding: chunked
+
+{
+
+...
+
+"configService:https://github.com/mstine/springbox-config-repo.git/application.yml": {
+  "bus": true,
+  "configserver": true
+},
+
+...
+
+}
+
+$ curl -i springbox-recommendations-preadherent-werewolf.cfapps.io/env
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:57:22 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-recommendations:cloud:61098
+X-Cf-Requestid: 37ec48c2-f46a-4011-73dc-a0eecf1abf7d
+transfer-encoding: chunked
+
+{
+
+...
+
+"configService:https://github.com/mstine/springbox-config-repo.git/application.yml": {
+  "bus": true,
+  "configserver": true
+},
+
+...
+
+}
+
+$ http springbox-reviews-understaffed-nickeltype.cfapps.io/env
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 18 Feb 2015 22:58:08 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: springbox-reviews:cloud:61086
+X-Cf-Requestid: 6bdc2cd6-4225-40d3-5125-62c8809f0205
+transfer-encoding: chunked
+
+{
+
+...
+
+"configService:https://github.com/mstine/springbox-config-repo.git/application.yml": {
+  "bus": true,
+  "configserver": true
+},
+
+...
+
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-18 14:03:58 PST
+Last updated 2015-02-18 14:59:27 PST
 </div>
 </div>
 </body>
