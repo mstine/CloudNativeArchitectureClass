@@ -685,11 +685,153 @@ b.conum * { color: inherit !important; }
 <h1>Lab 16 - Leveraging Eureka for Service Discovery via Spring Cloud Netflix</h1>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock abstract">
+<blockquote>
+<div class="paragraph">
+<p>Let&#8217;s continue learning the components found in Spring Cloud to implement patterns for distributed systems.
+We&#8217;ll use Spring Cloud Netflix to deploy Eureka, which is a component offering service registration and discovery.</p>
+</div>
+<div class="paragraph">
+<p>In this lab, we&#8217;ll do the following:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a Eureka server</p>
+</li>
+<li>
+<p>Create two applications, a &#8220;producer&#8221; and a &#8220;consumer,&#8221; wire them up using Eureka, and test them.</p>
+</li>
+<li>
+<p>Deploy the Eureka server to Pivotal Web Services</p>
+</li>
+<li>
+<p>Update our previously developed microservices to register themselves with Eureka</p>
+</li>
+</ol>
+</div>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_creating_a_eureka_server">Creating a Eureka Server</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_02/session_05/lab_16/initial/springbox-eureka</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and import the project (via <code>pom.xml</code>) into your IDE of choice.</p>
+</div>
+</li>
+<li>
+<p>Open <code>pom.xml</code>, change the parent POM to the <code>spring-cloud-starter-parent</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;parent&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-starter-parent&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0.RC3&lt;/version&gt;
+  &lt;relativePath/&gt;
+  &lt;!-- lookup parent from repository --&gt;
+&lt;/parent&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add the Spring Milestone repository (as Spring Cloud is still pre-GA):</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;repositories&gt;
+  &lt;repository&gt;
+    &lt;id&gt;spring-milestones&lt;/id&gt;
+    &lt;name&gt;Spring Milestones&lt;/name&gt;
+    &lt;url&gt;https://repo.spring.io/libs-milestone/&lt;/url&gt;
+    &lt;snapshots&gt;
+      &lt;enabled&gt;true&lt;/enabled&gt;
+      &lt;/snapshots&gt;
+  &lt;/repository&gt;
+&lt;/repositories&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add a dependency on <code>spring-cloud-starter-eureka-server</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-starter-eureka-server&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In <code>io.springbox.eureka.SpringboxEurekaApplication</code>, add the <code>@EnableEurekaServer</code> annotation:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@SpringBootApplication
+@EnableEurekaServer    // &lt;-- ADD THIS!
+public class SpringboxEurekaApplication {
 
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxEurekaApplication.class, args);
+    }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In <code>src/main/resources/application.properties</code>, set the <code>server.port</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>server.port=8761</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/springbox-eureka-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You will see a few exceptions&#8212;&#8203;these are related to Eureka trying to peer with a replica and are normal.</p>
+</div>
+</li>
+<li>
+<p>In a browser, visit <a href="http://localhost:8761" class="bare">http://localhost:8761</a> and verify that everything is working properly:</p>
+<div class="imageblock">
+<div class="content">
+<img src="../../../Common/images/eureka_1.png" alt="eureka 1">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 14:34:01 PST
+Last updated 2015-02-18 18:55:40 PST
 </div>
 </div>
 </body>
