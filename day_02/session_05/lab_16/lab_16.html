@@ -1230,10 +1230,63 @@ X-Application-Context: consumer:8081
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_deploy_the_eureka_server_to_cloud_foundry">Deploy the Eureka Server to Cloud Foundry</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create an application manifest in <code>manifest.yml</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yml" data-lang="yml">---
+applications:
+- name: springbox-eureka
+  host: springbox-eureka-${random-word}
+  memory: 512M
+  instances: 1
+  path: target/springbox-eureka-0.0.1-SNAPSHOT.jar</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Push to Cloud Foundry:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf push
+
+...
+
+Showing health and status for app springbox-eureka in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: springbox-eureka-blowsy-catechizer.cfapps.io
+last uploaded: Thu Feb 19 07:40:21 UTC 2015
+
+     state     since                    cpu    memory           disk
+#0   running   2015-02-18 11:41:10 PM   0.3%   386.1M of 512M   135.1M of 1G</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In a browser, visit the route assigned to your Eureka server and verify that everything is working properly:</p>
+<div class="imageblock">
+<div class="content">
+<img src="../../../Common/images/eureka_1.png" alt="eureka 1">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-18 23:32:46 PST
+Last updated 2015-02-18 23:43:16 PST
 </div>
 </div>
 </body>
