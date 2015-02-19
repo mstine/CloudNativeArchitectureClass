@@ -959,6 +959,16 @@ public class SpringboxProducerApplication {
 </div>
 </li>
 <li>
+<p>Create the file <code>src/main/resources/bootstrap.yml</code> and paste in the following source:</p>
+<div class="listingblock">
+<div class="content">
+<pre>spring:
+  application:
+    name: producer</pre>
+</div>
+</div>
+</li>
+<li>
 <p>We&#8217;ll use our Config Server to consistently configure the Eureka Client across all of our applications.
 In your config repo, open <code>application.yml</code> and add the following:</p>
 <div class="listingblock">
@@ -1028,10 +1038,202 @@ $ java -jar target/springbox-config-server-0.0.1-SNAPSHOT.jar</pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_create_and_register_the_consumer_service">Create and Register the Consumer Service</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_02/session_05/lab_16/initial/springbox-consumer</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and import the project (via <code>pom.xml</code>) into your IDE of choice.</p>
+</div>
+</li>
+<li>
+<p>Open <code>pom.xml</code>, change the parent POM to the <code>spring-cloud-starter-parent</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;parent&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-starter-parent&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0.RC3&lt;/version&gt;
+  &lt;relativePath/&gt;
+  &lt;!-- lookup parent from repository --&gt;
+&lt;/parent&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add the Spring Milestone repository (as Spring Cloud is still pre-GA):</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;repositories&gt;
+  &lt;repository&gt;
+    &lt;id&gt;spring-milestones&lt;/id&gt;
+    &lt;name&gt;Spring Milestones&lt;/name&gt;
+    &lt;url&gt;https://repo.spring.io/libs-milestone/&lt;/url&gt;
+    &lt;snapshots&gt;
+      &lt;enabled&gt;true&lt;/enabled&gt;
+      &lt;/snapshots&gt;
+  &lt;/repository&gt;
+&lt;/repositories&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add a dependency on <code>spring-cloud-starter</code> and <code>spring-cloud-starter-eureka</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-starter-eureka&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In the package <code>io.springbox.consumer</code>, create the class <code>ProducerResponse</code>, and into that class paste the following code:</p>
+<div class="listingblock">
+<div class="content">
+<pre>public class ProducerResponse {
+    private int value;
+
+    public void setValue(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Also in the package <code>io.springbox.consumer</code>, create the class <code>ConsumerController</code>, and into that class paste the following code:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@RestController
+public class ConsumerController {
+
+    @Autowired
+    DiscoveryClient discoveryClient;
+
+    @RequestMapping(value = "/", produces = "application/json")
+    String consume() {
+        InstanceInfo instance = discoveryClient.getNextServerFromEureka("PRODUCER", false);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ProducerResponse response = restTemplate.getForObject(instance.getHomePageUrl(), ProducerResponse.class);
+
+        return String.format("{\"value\":%d}", response.getValue());
+    }
+
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Now open <code>io.springbox.producer.SpringboxConsumerrApplication</code> and add the <code>@EnableDiscoveryClient</code> annotation:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@SpringBootApplication
+@EnableDiscoveryClient  // &lt;--- ADD THIS!
+public class SpringboxConsumerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxConsumerApplication.class, args);
+    }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In <code>src/main/resources/application.properties</code>, set the <code>server.port</code> property:</p>
+<div class="listingblock">
+<div class="content">
+<pre>server.port=8081</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the file <code>src/main/resources/bootstrap.yml</code> and paste in the following source:</p>
+<div class="listingblock">
+<div class="content">
+<pre>spring:
+  application:
+    name: consumer</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Now build the consumer application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>And run the consumer application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/springbox-consumer-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Ten seconds after the consumer application finishes startup, you should see it log its registration with Eureka:</p>
+<div class="listingblock">
+<div class="content">
+<pre>2015-02-18 23:29:55.703  INFO 45265 --- [pool-4-thread-1] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CONSUMER/turkey:consumer:8081 - Re-registering apps/CONSUMER
+2015-02-18 23:29:55.703  INFO 45265 --- [pool-4-thread-1] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CONSUMER/turkey:consumer:8081: registering service...
+2015-02-18 23:29:55.729  INFO 45265 --- [pool-4-thread-1] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CONSUMER/turkey:consumer:8081 - registration status: 204</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should also be able to refresh <a href="http://localhost:8761" class="bare">http://localhost:8761</a> in the browser and see the producer registered:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../../../Common/images/eureka_3.png" alt="eureka 3">
+</div>
+</div>
+</li>
+<li>
+<p>Using <code>curl</code>, test the consumer application and show that it is receiving values from the producer:</p>
+<div class="listingblock">
+<div class="content">
+<pre>curl -i localhost:8081
+HTTP/1.1 200 OK
+Content-Length: 11
+Content-Type: application/json;charset=UTF-8Date: Thu, 19 Feb 2015 07:32:21 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: consumer:8081
+
+{
+    "value": 0
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-18 23:05:02 PST
+Last updated 2015-02-18 23:32:46 PST
 </div>
 </div>
 </body>

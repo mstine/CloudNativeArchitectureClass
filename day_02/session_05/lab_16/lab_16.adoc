@@ -210,6 +210,14 @@ public class SpringboxProducerApplication {
 }
 ----
 
+. Create the file `src/main/resources/bootstrap.yml` and paste in the following source:
++
+----
+spring:
+  application:
+    name: producer
+----
+
 . We'll use our Config Server to consistently configure the Eureka Client across all of our applications.
 In your config repo, open `application.yml` and add the following:
 +
@@ -259,3 +267,156 @@ $ java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar
 You should also be able to refresh http://localhost:8761 in the browser and see the producer registered:
 +
 image::../../../Common/images/eureka_2.png[]
+
+== Create and Register the Consumer Service
+
+. Change to the lab directory:
++
+----
+$ cd $COURSE_HOME/day_02/session_05/lab_16/initial/springbox-consumer
+----
++
+and import the project (via `pom.xml`) into your IDE of choice.
+
+. Open `pom.xml`, change the parent POM to the `spring-cloud-starter-parent`:
++
+----
+<parent>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-parent</artifactId>
+  <version>1.0.0.RC3</version>
+  <relativePath/>
+  <!-- lookup parent from repository -->
+</parent>
+----
+
+. Add the Spring Milestone repository (as Spring Cloud is still pre-GA):
++
+----
+<repositories>
+  <repository>
+    <id>spring-milestones</id>
+    <name>Spring Milestones</name>
+    <url>https://repo.spring.io/libs-milestone/</url>
+    <snapshots>
+      <enabled>true</enabled>
+      </snapshots>
+  </repository>
+</repositories>
+----
+
+. Add a dependency on `spring-cloud-starter` and `spring-cloud-starter-eureka`:
++
+----
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-eureka</artifactId>
+</dependency>
+----
+
+. In the package `io.springbox.consumer`, create the class `ProducerResponse`, and into that class paste the following code:
++
+----
+public class ProducerResponse {
+    private int value;
+
+    public void setValue(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+}
+----
+
+. Also in the package `io.springbox.consumer`, create the class `ConsumerController`, and into that class paste the following code:
++
+----
+@RestController
+public class ConsumerController {
+
+    @Autowired
+    DiscoveryClient discoveryClient;
+
+    @RequestMapping(value = "/", produces = "application/json")
+    String consume() {
+        InstanceInfo instance = discoveryClient.getNextServerFromEureka("PRODUCER", false);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ProducerResponse response = restTemplate.getForObject(instance.getHomePageUrl(), ProducerResponse.class);
+
+        return String.format("{\"value\":%d}", response.getValue());
+    }
+
+}
+----
+
+. Now open `io.springbox.producer.SpringboxConsumerrApplication` and add the `@EnableDiscoveryClient` annotation:
++
+----
+@SpringBootApplication
+@EnableDiscoveryClient  // <--- ADD THIS!
+public class SpringboxConsumerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxConsumerApplication.class, args);
+    }
+}
+----
+
+. In `src/main/resources/application.properties`, set the `server.port` property:
++
+----
+server.port=8081
+----
+
+. Create the file `src/main/resources/bootstrap.yml` and paste in the following source:
++
+----
+spring:
+  application:
+    name: consumer
+----
+
+. Now build the consumer application:
++
+----
+$ mvn package
+----
+
+. And run the consumer application:
++
+----
+$ java -jar target/springbox-consumer-0.0.1-SNAPSHOT.jar
+----
+
+. Ten seconds after the consumer application finishes startup, you should see it log its registration with Eureka:
++
+----
+2015-02-18 23:29:55.703  INFO 45265 --- [pool-4-thread-1] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CONSUMER/turkey:consumer:8081 - Re-registering apps/CONSUMER
+2015-02-18 23:29:55.703  INFO 45265 --- [pool-4-thread-1] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CONSUMER/turkey:consumer:8081: registering service...
+2015-02-18 23:29:55.729  INFO 45265 --- [pool-4-thread-1] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_CONSUMER/turkey:consumer:8081 - registration status: 204
+----
++
+You should also be able to refresh http://localhost:8761 in the browser and see the producer registered:
++
+image::../../../Common/images/eureka_3.png[]
+
+. Using `curl`, test the consumer application and show that it is receiving values from the producer:
++
+----
+curl -i localhost:8081
+HTTP/1.1 200 OK
+Content-Length: 11
+Content-Type: application/json;charset=UTF-8Date: Thu, 19 Feb 2015 07:32:21 GMT
+Server: Apache-Coyote/1.1
+X-Application-Context: consumer:8081
+
+{
+    "value": 0
+}
