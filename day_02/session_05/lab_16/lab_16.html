@@ -1283,10 +1283,178 @@ last uploaded: Thu Feb 19 07:40:21 UTC 2015
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_update_the_microservices_to_use_eureka">Update the Microservices to Use Eureka</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>In the config repo, update the eureka section of application.yml:</p>
+<div class="listingblock">
+<div class="content">
+<pre>eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+    metadataMap:
+      instanceId: ${vcap.application.instance_id:${spring.application.name}:${server.port:8080}}
+  client:    # &lt;--- ADD THE CLIENT SECTION!!!
+    serviceUrl:
+      defaultZone: ${vcap.services.springbox-service-registry.credentials.uri:http://127.0.0.1:8761}/eureka/</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Also add a second YAML document to <code>application.yml</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>---
+spring:
+  profiles: cloud
+eureka:
+  instance:
+    hostname: ${vcap.application.uris[0]}
+    nonSecurePort: 80</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Stage, commit, and push your changes:</p>
+<div class="listingblock">
+<div class="content">
+<pre>git add . &amp;&amp; git commit -m "swap greeting" &amp;&amp; git push origin master</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Each of the three microservice projects has been copied into <code>$COURSE_HOME/day_02/session_05/lab_16/initial</code>, and are in the state we left them at the end of <a href="../lab_15/lab_15.adoc">Lab 15</a>.
+You can either continue your existing projects or pickup from these copies.</p>
+</div>
+<div class="paragraph">
+<p>For each project, perform the following steps (we&#8217;ll do these once for the <code>springbox-catalog</code> project in this guide):</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_02/session_05/lab_16/initial/springbox-catalog</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and import the project (via <code>pom.xml</code>) into your IDE of choice.</p>
+</div>
+</li>
+<li>
+<p>In <code>pom.xml</code>, add a dependency on <code>spring-cloud-starter-eureka</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-starter-eureka&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Now open <code>io.springbox.catalog.SpringboxCatalogApplication</code> and add the <code>@EnableDiscoveryClient</code> annotation:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@SpringBootApplication
+@EnableJpaRepositories
+@EnableDiscoveryClient  // &lt;--- ADD THIS!!!
+public class SpringboxCatalogApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxCatalogApplication.class, args);
+    }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In <code>manifest.yml</code>, add a binding to <code>springbox-service-registry</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>---
+applications:
+- name: springbox-catalog
+  host: springbox-catalog-${random-word}
+  memory: 512M
+  instances: 1
+  timeout: 90
+  path: target/springbox-catalog-0.0.1-SNAPSHOT.jar
+  env:
+    SPRING_PROFILES_ACTIVE: cloud
+  services:
+    - springbox-catalog-db
+    - springbox-config-service
+    - springbox-cloud-bus-amqp
+    - springbox-service-registry</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Push the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf push
+
+...
+
+Showing health and status for app springbox-catalog in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: springbox-catalog-overwild-nonrevival.cfapps.io
+last uploaded: Fri Feb 20 02:06:02 UTC 2015
+
+     state     since                    cpu     memory           disk
+#0   running   2015-02-19 06:07:35 PM   81.0%   446.1M of 512M   150.9M of 1G</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Ten seconds after the catalog application finishes startup, you should see it log its registration with Eureka:</p>
+<div class="listingblock">
+<div class="content">
+<pre>2015-02-19T18:07:45.21-0800 [App/0]      OUT 2015-02-20 02:07:45.212  INFO 31 --- [pool-7-thread-1] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_SPRINGBOX-CATALOG/springbox-catalog-overwild-nonrevival.cfapps.io:d458a40215004b2c902c47a157c2a2
+10 - Re-registering apps/SPRINGBOX-CATALOG
+2015-02-19T18:07:45.21-0800 [App/0]      OUT 2015-02-20 02:07:45.212  INFO 31 --- [pool-7-thread-1] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_SPRINGBOX-CATALOG/springbox-catalog-overwild-nonrevival.cfapps.io:d458a40215004b2c902c47a157c2a2
+10: registering service...
+2015-02-19T18:07:45.27-0800 [App/0]      OUT 2015-02-20 02:07:45.277  INFO 31 --- [pool-7-thread-1] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_SPRINGBOX-CATALOG/springbox-catalog-overwild-nonrevival.cfapps.io:d458a40215004b2c902c47a157c2a2
+10 - registration status: 204</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should also be able to refresh the route of your PWS deployed Eureka in the browser and see the catalog registered:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../../../Common/images/eureka_4.png" alt="eureka 4">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-18 23:43:16 PST
+Last updated 2015-02-19 18:28:52 PST
 </div>
 </div>
 </body>
