@@ -1,1 +1,1 @@
-= Lab 23 - API Aggregation and Transformation with RxJava
+= Lab 23 - Building a Simple Reverse Proxy with Zuul
