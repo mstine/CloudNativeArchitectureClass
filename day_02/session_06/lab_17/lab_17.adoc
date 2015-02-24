@@ -155,3 +155,117 @@ Date: Tue, 24 Feb 2015 05:47:33 GMTServer: Apache-Coyote/1.1X-Application-Contex
 ----
 
 == Trying Different Load Balancing Algorithms
+
+In this section we will swap the default ``round robin'' load balancing rule for a ``weighted response time'' load balancing rule.
+
+. In the package `io.springbox.consumer`, create the class `ProducerConfiguration`, and into that class paste the following code:
++
+----
+@Configuration
+public class ProducerConfiguration {
+
+    @Bean
+    public IClientConfig ribbonClientConfig() {
+        DefaultClientConfigImpl config = new DefaultClientConfigImpl();
+        config.loadProperties("producer");
+        return config;
+    }
+
+    @Bean
+    public IRule ribbonRule(IClientConfig config) {
+        WeightedResponseTimeRule rule = new WeightedResponseTimeRule();
+        rule.initWithNiwsConfig(config);
+        return rule;
+    }
+}
+----
+
+. Add the `@RibbonClient` annotation to `io.springbox.consumer.SpringboxConsumerApplication`:
++
+----
+@SpringBootApplication
+@EnableDiscoveryClient
+@RibbonClient(name = "producer", configuration = ProducerConfiguration.class)  // <--- ADD THIS!
+public class SpringboxConsumerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxConsumerApplication.class, args);
+    }
+}
+----
+
+. Rebuild the application:
++
+----
+$ mvn package
+----
+
+. Rerun the application:
++
+----
+$ java -jar target/springbox-consumer-0.0.1-SNAPSHOT.jar
+----
+
+. Now, let's introduce artificial latency into the producer application to cause the load balancer to prefer one instance over the other (on the average).
+Modify `io.springbox.producer.ProducerController` by pasting in the following source code:
++
+====
+----
+@RestController
+public class ProducerController {
+
+    @Value("${latency:0}") // <1>
+    int latency;
+
+    private Log log = LogFactory.getLog(ProducerController.class);
+    private AtomicInteger counter = new AtomicInteger(0);
+
+    @RequestMapping(value = "/", produces = "application/json")
+    public String produce() {
+        if (latency > 0) {
+            try {
+                Thread.sleep(latency);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        int value = counter.getAndIncrement();
+        log.info("Produced a value: " + value);
+
+        return String.format("{\"value\":%d}", value);
+    }
+
+}
+----
+<1> The expression `${latency:0}` will inject the value of the `latency` propery from the environment.
+If that property is not present, it will inject `0`.
+====
+
+. Rebuild the application:
++
+----
+$ mvn package
+----
+
+. In the two separate terminal windows running the producers, restart the applications while introducing the `LATENCY` environment variable:
++
+----
+$ LATENCY=250 SERVER_PORT=8080 java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar
+$ LATENCY=1000 SERVER_PORT=8082 java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar
+----
+
+. Issue a `curl localhost:8081`.
+You should see log messages in the consumer indicating that the load balancer has started calculating weights:
++
+----
+2015-02-24 09:14:49.617  INFO 86301 --- [tTimer-producer] c.n.l.WeightedResponseTimeRule           : Weight adjusting job started
+2015-02-24 09:14:49.617  INFO 86301 --- [nio-8081-exec-1] c.n.l.WeightedResponseTimeRule           : Weight adjusting job started
+2015-02-24 09:14:49.647  INFO 86301 --- [nio-8081-exec-1] c.n.l.WeightedResponseTimeRule           : Weight adjusting job started
+----
+
+. Use the `hitIt.sh` script located at `$COURSE_HOME/day_02/session_06/lab_17/initial/hitIt.sh` at to issue many requests to the consumer.
+You will see very different load balancing behavior from the original:
++
+----
+$ ./hitIt.sh localhost:8081 1000
+----
