@@ -685,11 +685,189 @@ b.conum * { color: inherit !important; }
 <h1>Lab 3 - Externalizing Configuration with Spring Boot</h1>
 </div>
 <div id="content">
+<div class="sect1">
+<h2 id="_refactoring_to_externalize_the_config">Refactoring to Externalize the Config</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_01/session_01/lab_03/initial/hello-spring-boot</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Import the project&#8217;s <code>pom.xml</code> into your editor/IDE of choice.</p>
+</li>
+<li>
+<p>Rename <code>src/main/resources/application.properties</code> to <code>src/main/resources/application.yml</code>. Into that file, paste the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>greeting: Hello</pre>
+</div>
+</div>
+</li>
+<li>
+<p>To the class <code>io.pivotal.spring.hello.HelloSpringBootApplication</code>, add a <code>greeting</code> field and inject its value:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@Value("${greeting}")
+String greeting;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Also <code>io.pivotal.spring.hello.HelloSpringBootApplication</code>, change the return statement of <code>hello()</code> to the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>return String.format("%s World!", greeting);</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit the application in the browser (<a href="http://localhost:8080" class="bare">http://localhost:8080</a>), and verify that the output is still the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>Hello World!</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Stop the application.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_environment_variables_for_config">Using Environment Variables for Config</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Run the application again, this time setting the <code>GREETING</code> environment variable:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ GREETING=Ohai java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit the application in the browser (<a href="http://localhost:8080" class="bare">http://localhost:8080</a>), and verify that the output has changed to the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>Ohai World!</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Stop the application.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_spring_profiles_for_config">Using Spring Profiles for Config</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Add a <code>spanish</code> profile to <code>application.yml</code>. Your finished configuration should reflect the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>greeting: Hello
 
+---
+
+spring:
+  profiles: spanish
+
+greeting: Hola</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application, this time setting the <code>SPRING_PROFILES_ACTIVE</code> environment variable:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ SPRING_PROFILES_ACTIVE=spanish java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit the application in the browser (<a href="http://localhost:8080" class="bare">http://localhost:8080</a>), and verify that the output has changed to the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>Hola World!</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Stop the application.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_resolving_conflicts">Resolving Conflicts</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Run the application, this time setting both the <code>SPRING_PROFILES_ACTIVE</code> and <code>GREETING</code> environment variables:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ SPRING_PROFILES_ACTIVE=spanish GREETING=Ohai java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit the application in the browser (<a href="http://localhost:8080" class="bare">http://localhost:8080</a>), and verify that the output has changed to the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>Ohai World!</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html" class="bare">http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html</a> to learn more about this outcome and the entire priority scheme for conflict resolution.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 17:02:43 EST
+Last updated 2015-05-03 16:50:28 EDT
 </div>
 </div>
 </body>
