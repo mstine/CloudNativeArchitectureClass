@@ -1,1 +1,117 @@
 = Lab 3 - Externalizing Configuration with Spring Boot
+
+== Refactoring to Externalize the Config
+
+. Change to the lab directory:
++
+----
+$ cd $COURSE_HOME/day_01/session_01/lab_03/initial/hello-spring-boot
+----
+
+. Import the project's `pom.xml` into your editor/IDE of choice.
+
+. Rename `src/main/resources/application.properties` to `src/main/resources/application.yml`. Into that file, paste the following:
++
+----
+greeting: Hello
+----
+
+. To the class `io.pivotal.spring.hello.HelloSpringBootApplication`, add a `greeting` field and inject its value:
++
+----
+@Value("${greeting}")
+String greeting;
+----
+
+. Also `io.pivotal.spring.hello.HelloSpringBootApplication`, change the return statement of `hello()` to the following:
++
+----
+return String.format("%s World!", greeting);
+----
+
+. Build the application:
++
+----
+$ mvn package
+----
+
+. Run the application:
++
+----
+$ java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar
+----
+
+. Visit the application in the browser (http://localhost:8080), and verify that the output is still the following:
++
+----
+Hello World!
+----
+
+. Stop the application.
+
+== Using Environment Variables for Config
+
+. Run the application again, this time setting the `GREETING` environment variable:
++
+----
+$ GREETING=Ohai java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar
+----
+
+. Visit the application in the browser (http://localhost:8080), and verify that the output has changed to the following:
++
+----
+Ohai World!
+----
+
+. Stop the application.
+
+== Using Spring Profiles for Config
+
+. Add a `spanish` profile to `application.yml`. Your finished configuration should reflect the following:
++
+----
+greeting: Hello
+
+---
+
+spring:
+  profiles: spanish
+
+greeting: Hola
+----
+
+. Build the application:
++
+----
+$ mvn package
+----
+
+. Run the application, this time setting the `SPRING_PROFILES_ACTIVE` environment variable:
++
+----
+$ SPRING_PROFILES_ACTIVE=spanish java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar
+----
+
+. Visit the application in the browser (http://localhost:8080), and verify that the output has changed to the following:
++
+----
+Hola World!
+----
+
+. Stop the application.
+
+== Resolving Conflicts
+
+. Run the application, this time setting both the `SPRING_PROFILES_ACTIVE` and `GREETING` environment variables:
++
+----
+$ SPRING_PROFILES_ACTIVE=spanish GREETING=Ohai java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar
+----
+
+. Visit the application in the browser (http://localhost:8080), and verify that the output has changed to the following:
++
+----
+Ohai World!
+----
+
+. Visit http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html to learn more about this outcome and the entire priority scheme for conflict resolution.
