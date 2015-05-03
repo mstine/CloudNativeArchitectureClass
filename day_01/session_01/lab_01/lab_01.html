@@ -685,11 +685,96 @@ b.conum * { color: inherit !important; }
 <h1>Lab 1 - Getting Started with Spring Boot</h1>
 </div>
 <div id="content">
-
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>In your browser, visit <a href="http://start.spring.io" class="bare">http://start.spring.io</a>.</p>
+</li>
+<li>
+<p>Fill out the <strong>Project metadata</strong> fields as follows:</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Group</dt>
+<dd>
+<p><code>io.spring.pivotal</code></p>
+</dd>
+<dt class="hdlist1">Artifact</dt>
+<dd>
+<p><code>hello-spring-boot</code></p>
+</dd>
+<dt class="hdlist1">Name</dt>
+<dd>
+<p><code>hello-spring-boot</code></p>
+</dd>
+<dt class="hdlist1">Description</dt>
+<dd>
+<p><code>Hello Spring Boot</code></p>
+</dd>
+<dt class="hdlist1">Package Name</dt>
+<dd>
+<p><code>io.pivotal.spring.hello</code></p>
+</dd>
+<dt class="hdlist1">Type</dt>
+<dd>
+<p>Maven Project</p>
+</dd>
+<dt class="hdlist1">Packaging</dt>
+<dd>
+<p>Jar</p>
+</dd>
+<dt class="hdlist1">Java Version</dt>
+<dd>
+<p>1.7</p>
+</dd>
+<dt class="hdlist1">Language</dt>
+<dd>
+<p>Java
+Spring Boot Version 1.2.3</p>
+</dd>
+</dl>
+</div>
+</li>
+<li>
+<p>In the <strong>Project dependencies</strong> section, check the following:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Web</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Click the <strong>Generate Project</strong> button. Your browser will download a zip file.
+Unpack that zip file at <code>$COURSE_HOME/day_01/session_01/lab_01/initial</code>.</p>
+</li>
+<li>
+<p>Import the project&#8217;s <code>pom.xml</code> into your editor/IDE of choice.</p>
+</li>
+<li>
+<p>Add a <code>@RestController</code> annotation to the class <code>io.pivotal.spring.hello.HelloSpringBootApplication</code>.</p>
+</li>
+<li>
+<p>Add the following request handler to the class <code>io.pivotal.spring.hello.HelloSpringBootApplication</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">@RequestMapping("/")
+public String hello() {
+    return "Hello World!";
+}</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p><strong>Congratulations!</strong>
+You&#8217;ve just completed your first Spring Boot application.</p>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 16:02:10 CST
+Last updated 2015-05-03 13:09:06 EDT
 </div>
 </div>
 </body>
