@@ -1,1 +1,40 @@
 = Lab 1 - Getting Started with Spring Boot
+
+. In your browser, visit http://start.spring.io.
+
+. Fill out the *Project metadata* fields as follows:
++
+Group:: `io.spring.pivotal`
+Artifact:: `hello-spring-boot`
+Name:: `hello-spring-boot`
+Description:: `Hello Spring Boot`
+Package Name:: `io.pivotal.spring.hello`
+Type:: Maven Project
+Packaging:: Jar
+Java Version:: 1.7
+Language:: Java
+Spring Boot Version 1.2.3
+
+. In the *Project dependencies* section, check the following:
++
+* Web
+
+. Click the *Generate Project* button. Your browser will download a zip file.
+Unpack that zip file at `$COURSE_HOME/day_01/session_01/lab_01/initial`.
+
+. Import the project's `pom.xml` into your editor/IDE of choice.
+
+. Add a `@RestController` annotation to the class `io.pivotal.spring.hello.HelloSpringBootApplication`.
+
+. Add the following request handler to the class `io.pivotal.spring.hello.HelloSpringBootApplication`:
++
+[source,java]
+----
+@RequestMapping("/")
+public String hello() {
+    return "Hello World!";
+}
+----
+
+*Congratulations!*
+You've just completed your first Spring Boot application.
