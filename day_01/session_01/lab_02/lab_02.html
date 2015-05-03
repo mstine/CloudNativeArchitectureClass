@@ -685,11 +685,140 @@ b.conum * { color: inherit !important; }
 <h1>Lab 2 - Deploying a Web Application with an Embedded Container</h1>
 </div>
 <div id="content">
-
+<div class="sect1">
+<h2 id="_build_and_run_with_embedded_apache_tomcat">Build and Run with Embedded Apache Tomcat</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Boot will embed Apache Tomcat by default.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_01/session_01/lab_02/complete/hello-spring-boot</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see the application start up an embedded Apache Tomcat server on port 8080:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>2015-05-03 13:20:51.690  INFO 2465 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
+2015-05-03 13:20:51.691  INFO 2465 --- [           main] i.p.s.hello.HelloSpringBootApplication   : Started HelloSpringBootApplication in 3.023 seconds (JVM running for 3.432)</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit the application in the browser (<a href="http://localhost:8080" class="bare">http://localhost:8080</a>), and you should see the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>Hello World!</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_build_and_run_with_embedded_eclipse_jetty">Build and Run with Embedded Eclipse Jetty</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Boot also supports embedding a Jetty server.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Open <code>pom.xml</code> and replace the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+    &lt;exclusions&gt;
+        &lt;exclusion&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+        &lt;/exclusion&gt;
+    &lt;/exclusions&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see the application start up an embedded Jetty server on port 8080:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>2015-05-03 13:26:31.370  INFO 3078 --- [           main] .s.b.c.e.j.JettyEmbeddedServletContainer : Jetty started on port(s) 8080 (http/1.1)
+2015-05-03 13:26:31.371  INFO 3078 --- [           main] i.p.s.hello.HelloSpringBootApplication   : Started HelloSpringBootApplication in 3.671 seconds (JVM running for 4.079)</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit the application in the browser (<a href="http://localhost:8080" class="bare">http://localhost:8080</a>), and you should see the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>Hello World!</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 17:02:24 EST
+Last updated 2015-05-03 13:27:48 EDT
 </div>
 </div>
 </body>
