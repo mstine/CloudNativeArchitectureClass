@@ -7,7 +7,7 @@ Spring Boot will embed Apache Tomcat by default.
 . Change to the lab directory:
 +
 ----
-$ cd $COURSE_HOME/day_01/session_01/lab_02/complete/hello-spring-boot
+$ cd $COURSE_HOME/day_01/session_01/lab_02/initial/hello-spring-boot
 ----
 
 . Build the application:
