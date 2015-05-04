@@ -1,4 +1,3 @@
-footer: © 2015 Matt Stine
 slidenumbers: true
 
 # [fit] Cloud-Native
@@ -9,21 +8,9 @@ slidenumbers: true
 
 ---
 
-![left](../../Common/images/mattmug.jpeg)
-# Me
-
-Matt Stine ([@mstine](http://twitter.com/mstine))
-Senior Product Manager
-Pivotal
-[http://www.mattstine.com](http://www.mattstine.com)
-[matt.stine@gmail.com](mailto:matt.stine@gmail.com)
-
----
-
 # [fit] Session
 # [fit] 4
 ![](../../Common/images/cf_logo.png)
-
 
 ---
 
