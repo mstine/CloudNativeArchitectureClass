@@ -685,11 +685,39 @@ b.conum * { color: inherit !important; }
 <h1>Lab 21 - Creating an OAuth2 Authorization Server</h1>
 </div>
 <div id="content">
-
+<div class="sect1">
+<h2 id="_testing_it_out">Testing it out</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To test the authentication server execute a simple POST to the /uaa/oauth/token endpoint, you will need to set the following headers:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Authorization : Basic + a base64 encoded string of the clientId:clientSecret, on this example it will be acme:acmesecret</p>
+</li>
+<li>
+<p>Content-Type : application/x-www-form-urlencoded</p>
+</li>
+<li>
+<p>Payload: grant_type=password&amp;username=&lt;username&gt;&amp;password=&lt;password&gt;</p>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XPOST -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "Authorization: Basic YWNtZTphY21lc2VjcmV0" \
+             http://springbox-auth-server-snakiest-doggerel.nyc.fe.pivotal.io/uaa/oauth/token \
+             -d "grant_type=password&amp;username=mstine&amp;password=secret"</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 16:35:30 CST
+Last updated 2015-05-04 10:57:01 CDT
 </div>
 </div>
 </body>
