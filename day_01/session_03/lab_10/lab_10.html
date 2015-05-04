@@ -688,7 +688,7 @@ b.conum * { color: inherit !important; }
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this lab we&#8217;ll bind our RESTful web service from <a href="../lab_09/lab_09.html">Lab 9</a> to a PostgreSQL database and leverage Spring Cloud Connectors to easily connect to it.</p>
+<p>In this lab we&#8217;ll bind our RESTful web service from <a href="../lab_09/lab_09.html">Lab 9</a> to a MySQL database and leverage Spring Cloud Connectors to easily connect to it.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -718,11 +718,11 @@ The completed code for this lab can be found at <code>$COURSE_HOME/day_01/sessio
 </div>
 </li>
 <li>
-<p>At present we&#8217;re still using the in-memory database. Let&#8217;s connect to a PostgreSQL database service provided by <a href="http://www.elephantsql.com/">ElephantSQL</a>.
-From the CLI, let&#8217;s <em>create</em> a free ElephantSQL service instance:</p>
+<p>At present we&#8217;re still using the in-memory database. Let&#8217;s connect to a MySQL database service.
+From the CLI, let&#8217;s <em>create</em> a MySQL service instance:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ cf create-service elephantsql turtle cities-db
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ cf cs p-mysql 100mb-dev cities-db
 Creating service cities-db...
 OK</code></pre>
 </div>
@@ -764,7 +764,8 @@ OK</code></pre>
     // ....
     compile("org.springframework.cloud:spring-cloud-spring-service-connector:1.1.0.RELEASE")
     compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.1.0.RELEASE")
-    runtime("postgresql:postgresql:9.1-901-1.jdbc4")
+    runtime("'org.mariadb.jdbc:mariadb-java-client:1.1.7'
+")
 }</code></pre>
 </div>
 </div>
@@ -824,14 +825,14 @@ public class CloudDataSourceConfig extends AbstractCloudConfig {
 <p>Take a look at the <code>env</code> endpoint again to see the service bound in <code>VCAP_SERVICES</code>:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ curl http://cities-crouse-penance.cfapps.io/env
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ curl http://cities-colorado-contemplator.nyc.fe.gopivotal.com/env
 ...
-VCAP_SERVICES: "{"elephantsql":[{"name":"cities-db","label":"elephantsql","tags":["Data Stores","Cloud Databases","Developer Tools","Data Store","postgresql","relational","New Product"],"plan":"turtle","credentials":{"uri":"postgres://okoaxkll:Il2L3Z6vSywRw2kNKd4G997VAhd3c7gy@babar.elephantsql.com:5432/okoaxkll","max_conns":"5"}}]}",
+"VCAP_SERVICES":"{\"p-mysql\":[{\"name\":\"cities-db\",\"label\":\"p-mysql\",\"tags\":[\"mysql\",\"relational\"],\"plan\":\"100mb-dev\",\"credentials\":{\"hostname\":\"10.68.106.85\",\"port\":3306,\"name\":\"cf_7a5601f9_32e3_41e1_b523_ed5ca96418f5\",\"username\":\"Vm2Z9D848eagt4rq\",\"password\":\"JgstkF06p2SOTlZg\",\"uri\":\"mysql://Vm2Z9D848eagt4rq:JgstkF06p2SOTlZg@10.68.106.85:3306/cf_7a5601f9_32e3_41e1_b523_ed5ca96418f5?reconnect=true\",\"jdbcUrl\":\"jdbc:mysql://10.68.106.85:3306/cf_7a5601f9_32e3_41e1_b523_ed5ca96418f5?user=Vm2Z9D848eagt4rq&amp;password=JgstkF06p2SOTlZg\"}}]}",
 ...</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The application is now running against a PostgreSQL database.</p>
+<p>The application is now running against a MySQL database.</p>
 </div>
 </li>
 </ol>
@@ -890,7 +891,7 @@ public DataSource dataSource() {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-15 13:38:35 CST
+Last updated 2015-05-04 15:15:17 CDT
 </div>
 </div>
 </body>

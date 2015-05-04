@@ -1,7 +1,7 @@
 :compat-mode:
 = Lab 10 - Leveraging Spring Cloud Connectors for Service Binding
 
-In this lab we'll bind our RESTful web service from link:../lab_09/lab_09.html[Lab 9] to a PostgreSQL database and leverage Spring Cloud Connectors to easily connect to it.
+In this lab we'll bind our RESTful web service from link:../lab_09/lab_09.html[Lab 9] to a MySQL database and leverage Spring Cloud Connectors to easily connect to it.
 
 NOTE: The completed code for this lab can be found at `$COURSE_HOME/day_01/session_03/lab_10/complete/cities`.
 
@@ -13,12 +13,12 @@ NOTE: The completed code for this lab can be found at `$COURSE_HOME/day_01/sessi
 $ cd $COURSE_HOME/day_01/session_03/lab_10/initial/cities
 ----
 
-. At present we're still using the in-memory database. Let's connect to a PostgreSQL database service provided by http://www.elephantsql.com/[ElephantSQL].
-From the CLI, let's _create_ a free ElephantSQL service instance:
+. At present we're still using the in-memory database. Let's connect to a MySQL database service.
+From the CLI, let's _create_ a MySQL service instance:
 +
 [source,bash]
 ----
-$ cf create-service elephantsql turtle cities-db
+$ cf cs p-mysql 100mb-dev cities-db
 Creating service cities-db...
 OK
 ----
@@ -57,7 +57,8 @@ dependencies {
     // ....
     compile("org.springframework.cloud:spring-cloud-spring-service-connector:1.1.0.RELEASE")
     compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.1.0.RELEASE")
-    runtime("postgresql:postgresql:9.1-901-1.jdbc4")
+    runtime("'org.mariadb.jdbc:mariadb-java-client:1.1.7'
+")
 }
 ----
 +
@@ -108,12 +109,12 @@ $ cf push
 +
 [source,bash]
 ----
-$ curl http://cities-crouse-penance.cfapps.io/env
+$ curl http://cities-colorado-contemplator.nyc.fe.gopivotal.com/env
 ...
-VCAP_SERVICES: "{"elephantsql":[{"name":"cities-db","label":"elephantsql","tags":["Data Stores","Cloud Databases","Developer Tools","Data Store","postgresql","relational","New Product"],"plan":"turtle","credentials":{"uri":"postgres://okoaxkll:Il2L3Z6vSywRw2kNKd4G997VAhd3c7gy@babar.elephantsql.com:5432/okoaxkll","max_conns":"5"}}]}",
+"VCAP_SERVICES":"{\"p-mysql\":[{\"name\":\"cities-db\",\"label\":\"p-mysql\",\"tags\":[\"mysql\",\"relational\"],\"plan\":\"100mb-dev\",\"credentials\":{\"hostname\":\"10.68.106.85\",\"port\":3306,\"name\":\"cf_7a5601f9_32e3_41e1_b523_ed5ca96418f5\",\"username\":\"Vm2Z9D848eagt4rq\",\"password\":\"JgstkF06p2SOTlZg\",\"uri\":\"mysql://Vm2Z9D848eagt4rq:JgstkF06p2SOTlZg@10.68.106.85:3306/cf_7a5601f9_32e3_41e1_b523_ed5ca96418f5?reconnect=true\",\"jdbcUrl\":\"jdbc:mysql://10.68.106.85:3306/cf_7a5601f9_32e3_41e1_b523_ed5ca96418f5?user=Vm2Z9D848eagt4rq&password=JgstkF06p2SOTlZg\"}}]}",
 ...
 ----
-The application is now running against a PostgreSQL database.
+The application is now running against a MySQL database.
 
 == Customizing the +DataSource+
 
