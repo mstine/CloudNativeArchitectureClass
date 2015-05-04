@@ -67,7 +67,7 @@ $ git checkout citi
 ** link:day_01/session_02/lab_06/lab_06.html[Lab 6 - Binding to Cloud Foundry Services]
 ** link:day_01/session_02/lab_07/lab_07.html[Lab 7 - Scaling Applications]
 ** link:day_01/session_02/lab_08/lab_08.html[Lab 8 - Monitoring Applications]
-* Session 3
+* Session 3 (link:day_01/session_03/session_03.pdf[Slides])
 ** link:day_01/session_03/lab_09/lab_09.html[Lab 9 - Build a Hypermedia-Driven RESTful Web Service with Spring Data REST]
 ** link:day_01/session_03/lab_10/lab_10.html[Lab 10 - Leveraging Spring Cloud Connectors for Service Binding]
 * Session 4 (link:day_01/session_04/session_04.pdf[Slides])

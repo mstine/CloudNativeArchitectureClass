@@ -9,7 +9,7 @@ slidenumbers: true
 ---
 
 # [fit] Session
-# [fit] 4
+# [fit] Four
 ![](../../Common/images/cf_logo.png)
 
 ---
@@ -21,3 +21,47 @@ slidenumbers: true
 # [fit] Part 2
 
 ---
+
+# [fit] SpringBox!
+
+---
+
+![inline fit](../../Common/images/redbox.png)
+
+---
+
+# We'll implement the front-end of this service...
+
+---
+
+# Imagine 4 Teams:
+
+- Movie Catalog
+- Movie Reviews
+- Movie Recommendations
+- Web UI
+
+---
+
+# SpringBox High-Level Architecture
+![inline](../../Common/images/API_Gateway.png)
+
+---
+
+# In this session...
+
+- Movie Catalog (MySQL)
+- Movie Reviews (MongoDB)
+- Movie Recommendations (Neo4J)
+- All via Spring Data
+
+---
+
+# Tomorrow...
+
+We'll start using distributed system patterns to glue it all together!
+
+---
+
+# [fit] TO THE
+# [Fit] LABS!
