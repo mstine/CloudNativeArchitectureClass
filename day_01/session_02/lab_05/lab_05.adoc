@@ -2,6 +2,11 @@
 
 == PWS Setup (NEW!)
 
+. Make sure you've created a Pivotal Web Services (PWS) account as indicated in the prerequisites.
+. Enter your username (the email address you used to register with PWS) on any unused row of the class https://docs.google.com/spreadsheets/d/1kMlV-D3pIVQfhsDDcfFXDgYRsZk7zY7i-dQy0n098_E[Google Sheet].
+. We'll run a script that gets everyone added to the appropriate space on PWS.
+. Once we've run this script, you should be able to start the lab.
+
 == Registration Steps (WIP):
 
 . Make sure you've created a Pivotal Web Services (PWS) account as indicated in the prerequisites.
