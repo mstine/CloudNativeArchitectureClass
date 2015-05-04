@@ -26,7 +26,7 @@ The overwhelming majority of our time will be spent engaging with the technology
 NOTE: We will be updating the course materials throughout the class. You will need to have the materials cloned and track the `citi` branch.
 
 This can be accomplished as follows:
-+
+
 ----
 $ git clone https://github.com/mstine/CloudNativeArchitectureClass
 $ git fetch --all
