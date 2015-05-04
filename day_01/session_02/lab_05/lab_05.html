@@ -686,67 +686,26 @@ b.conum * { color: inherit !important; }
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_registration_steps_wip">Registration Steps (WIP):</h2>
+<h2 id="_setup">Setup</h2>
 <div class="sectionbody">
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Make sure you&#8217;ve created a Pivotal Web Services (PWS) account as indicated in the prerequisites.</p>
-</li>
-<li>
-<p>Enter your username (the email address you used to register with PWS) on any unused row of the class <a href="https://docs.google.com/spreadsheets/d/1kMlV-D3pIVQfhsDDcfFXDgYRsZk7zY7i-dQy0n098_E">Google Sheet</a>.</p>
-</li>
-<li>
-<p>We&#8217;ll run a script that gets everyone added to the appropriate space on PWS.</p>
-</li>
-<li>
-<p>Once we&#8217;ve run this script, you should be able to start the lab.</p>
-</li>
-</ol>
+<p>If you are on the Citi network, set the proxy as an environment variable:</p>
+<div class="listingblock">
+<div class="content">
+<pre>export HTTP_PROXY=http://webproxy.wlb2.nam.nsroot.net:8080/</pre>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_target">Target</h2>
-<div class="sectionbody">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>If you haven&#8217;t already, download the latest release of the Cloud Foundry CLI from <a href="https://github.com/cloudfoundry/cli/releases" class="bare">https://github.com/cloudfoundry/cli/releases</a> for your operating system and install it.</p>
 </li>
 <li>
 <p>Set the API target for the CLI:</p>
 <div class="listingblock">
 <div class="content">
-<pre>$ cf api api.run.pivotal.io</pre>
-</div>
-</div>
-</li>
-<li>
-<p>Login to Pivotal Web Services:</p>
-<div class="listingblock">
-<div class="content">
-<pre>$ cf login</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Follow the prompts, choosing <code>oreilly-class</code> when prompted for an organization and <code>studentXX</code> when prompted for a space.</p>
-</div>
-</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_workshop_labs">Workshop labs</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content">
 <pre>$ cf api api.nyc.fe.pivotal.io --skip-ssl-validation</pre>
 </div>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
 <li>
 <p>Your username will be your employee ID. Password will be provided in the class</p>
 </li>
@@ -925,7 +884,7 @@ It will become important in the next lab!</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-05-04 10:57:01 CDT
+Last updated 2015-05-04 11:26:21 CDT
 </div>
 </div>
 </body>

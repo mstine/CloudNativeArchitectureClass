@@ -1,33 +1,15 @@
 = Lab 5 - From Zero to Pushing Your First Application
 
-== Registration Steps (WIP):
+== Setup
 
-. Make sure you've created a Pivotal Web Services (PWS) account as indicated in the prerequisites.
-. Enter your username (the email address you used to register with PWS) on any unused row of the class https://docs.google.com/spreadsheets/d/1kMlV-D3pIVQfhsDDcfFXDgYRsZk7zY7i-dQy0n098_E[Google Sheet].
-. We'll run a script that gets everyone added to the appropriate space on PWS.
-. Once we've run this script, you should be able to start the lab.
-
-== Target
-
-. If you haven't already, download the latest release of the Cloud Foundry CLI from https://github.com/cloudfoundry/cli/releases for your operating system and install it.
+. If you are on the Citi network, set the proxy as an environment variable:
++
+----
+export HTTP_PROXY=http://webproxy.wlb2.nam.nsroot.net:8080/
+----
 
 . Set the API target for the CLI:
 +
-----
-$ cf api api.run.pivotal.io
-----
-
-. Login to Pivotal Web Services:
-+
-----
-$ cf login
-----
-+
-Follow the prompts, choosing `oreilly-class` when prompted for an organization and `studentXX` when prompted for a space.
-
-== Workshop labs
-
-
 ----
 $ cf api api.nyc.fe.pivotal.io --skip-ssl-validation
 ----
