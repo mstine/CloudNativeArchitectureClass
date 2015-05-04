@@ -685,11 +685,371 @@ b.conum * { color: inherit !important; }
 <h1>Lab 4 - Introspection, Monitoring, and Metrics using Spring Boot Actuator</h1>
 </div>
 <div id="content">
+<div class="sect1">
+<h2 id="_set_up_the_actuator">Set up the Actuator</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_01/session_01/lab_04/initial/hello-spring-boot</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Import the project&#8217;s <code>pom.xml</code> into your editor/IDE of choice.</p>
+</li>
+<li>
+<p>To <code>pom.xml</code> add the following dependency to include the starter for Spring Boot Actuator:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introspection_endpoints">Introspection Endpoints</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Try out the following endpoints. The output is omitted here because it can be quite large:</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="http://localhost:8080/beans" class="bare">http://localhost:8080/beans</a></dt>
+<dd>
+<p>Dumps all of the beans in the Spring context.</p>
+</dd>
+<dt class="hdlist1"><a href="http://localhost:8080/autoconfig" class="bare">http://localhost:8080/autoconfig</a></dt>
+<dd>
+<p>Dumps all of the auto-configuration performed as part of application bootstrapping.</p>
+</dd>
+<dt class="hdlist1"><a href="http://localhost:8080/configprops" class="bare">http://localhost:8080/configprops</a></dt>
+<dd>
+<p>Displays a collated list of all <code>@ConfigurationProperties</code>.</p>
+</dd>
+<dt class="hdlist1"><a href="http://localhost:8080/env" class="bare">http://localhost:8080/env</a></dt>
+<dd>
+<p>Dumps the application&#8217;s shell environment as well as all Java system properties.</p>
+</dd>
+<dt class="hdlist1"><a href="http://localhost:8080/mappings" class="bare">http://localhost:8080/mappings</a></dt>
+<dd>
+<p>Dumps all URI request mappings and the controller methods to which they are mapped.</p>
+</dd>
+<dt class="hdlist1"><a href="http://localhost:8080/dump" class="bare">http://localhost:8080/dump</a></dt>
+<dd>
+<p>Performs a thread dump.</p>
+</dd>
+<dt class="hdlist1"><a href="http://localhost:8080/trace" class="bare">http://localhost:8080/trace</a></dt>
+<dd>
+<p>Displays trace information (by default the last few HTTP requests).</p>
+</dd>
+</dl>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_build_and_version_control_info">Build and Version Control Info</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Boot provides an endpoint (<a href="http://localhost:8080/info" class="bare">http://localhost:8080/info</a>) that allows the exposure of arbitrary metadata.</p>
+</div>
+<div class="paragraph">
+<p>One thing that it does well is expose information about the specific build and version control coordinates for a given deployment.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Add the following plugin to your Maven build.
+It will add Git branch and commit coordinates to the <code>/info</code> endpoint:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;plugin&gt;
+	&lt;groupId&gt;pl.project13.maven&lt;/groupId&gt;
+	&lt;artifactId&gt;git-commit-id-plugin&lt;/artifactId&gt;
+	&lt;configuration&gt;
+			&lt;dotGitDirectory&gt;../../../../../.git&lt;/dotGitDirectory&gt;
+	&lt;/configuration&gt;
+&lt;/plugin&gt;</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The path <code>../../../../../.git</code> refers to the <code>.git</code> directory at the root of the course materials.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Add the following properties to <code>src/main/resources/application.yml</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>info:
+  build:
+    artifact: @project.artifactId@
+    name: @project.name@
+    description: @project.description@
+    version: @project.version@</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These will add the project&#8217;s Maven coordinates to the <code>/info</code> endpoint. The Spring Boot Maven plugin will cause them to automatically be replaced in the assembled JAR.</p>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit the application in the browser (<a href="http://localhost:8080/info" class="bare">http://localhost:8080/info</a>), and verify that the output is similar to the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>{
+  build: {
+    artifact: "hello-spring-boot",
+    name: "hello-spring-boot",
+    description: "Hello Spring Boot",
+    version: "0.0.1-SNAPSHOT"
+  },
+  git: {
+    branch: "master",
+    commit: {
+      id: "a15f771",
+      time: "2015-05-03T16:51:31-0400"
+    }
+  }
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_health_indicators">Health Indicators</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Boot provides an endpoint (<a href="http://localhost:8080/health" class="bare">http://localhost:8080/health</a>) that allows for the notion of various health indicators.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Normally, when Spring Security is not enabled, the <code>/health</code> endpoint will only expose an <code>UP</code> or <code>DOWN</code> value.
+To simplify working with the endpoint for this lab, we will turn off its sensitivity.
+Add the following to <code>src/main/resources/application.yml</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>endpoints:
+  health:
+    sensitive: false</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the class <code>io.pivotal.spring.hello.FlappingHealthIndicator</code> and into it paste the following code:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@Component
+public class FlappingHealthIndicator implements HealthIndicator{
 
+    private Random random = new Random(System.currentTimeMillis());
+
+    @Override
+    public Health health() {
+        int result = random.nextInt(100);
+        if (result &lt; 50) {
+            return Health.down().withDetail("flapper", "failure").withDetail("random", result).build();
+        } else {
+            return Health.up().withDetail("flapper", "ok").withDetail("random", result).build();
+        }
+    }
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This demo health indicator will randomize the health check.</p>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit the application in the browser (<a href="http://localhost:8080/health" class="bare">http://localhost:8080/health</a>), and verify that the output is similar to the following (and changes randomly!):</p>
+<div class="listingblock">
+<div class="content">
+<pre>{
+  status: "UP",
+  flapping: {
+    status: "UP",
+    flapper: "ok",
+    random: 69
+  },
+  diskSpace: {
+    status: "UP",
+    free: 113632186368,
+    threshold: 10485760
+  }
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_metrics">Metrics</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Boot provides an endpoint (<a href="http://localhost:8080/metrics" class="bare">http://localhost:8080/metrics</a>) that exposes several automatically collected metrics for your application.
+It also allows for the creation of custom metrics.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create the class <code>io.pivotal.spring.hello.GreetingService</code> and into it paste the following code:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@Component
+public class GreetingService {
+
+    @Autowired
+    CounterService counterService;
+
+    @Value("${greeting}")
+    String greeting;
+
+    public String getGreeting() {
+        counterService.increment("counter.services.greeting.invoked");
+        return greeting;
+    }
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This class is using the <code>@Autowired</code> <code>CounterService</code> to count the number of times that the <code>getGreeting()</code> method has been invoked.</p>
+</div>
+</li>
+<li>
+<p>Refactor the contents of the class <code>io.spring.hello.HelloSpringBootApplication</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@Autowired
+private GreetingService greetingService;
+
+@RequestMapping("/")
+public String hello() {
+    return String.format("%s World!", greetingService.getGreeting());
+}
+
+public static void main(String[] args) {
+    SpringApplication.run(HelloSpringBootApplication.class, args);
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>hello()</code> is now delegating the source of the greeting to our newly created <code>GreetingService</code>.</p>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/hello-spring-boot-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Visit the application in the browser (<a href="http://localhost:8080" class="bare">http://localhost:8080</a>) and refresh the page several times.</p>
+</li>
+<li>
+<p>Now visit the <code>/metrics</code> endpoint (<a href="http://localhost:8080/metrics" class="bare">http://localhost:8080/metrics</a>).
+Among the autogenerated metrics you should see a <code>counter</code> for the <code>GreetingService</code> invocations:</p>
+<div class="listingblock">
+<div class="content">
+<pre>counter.services.greeting.invoked: 16,</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To learn more about the autogenerated metrics, visit <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html" class="bare">http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html</a>.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 17:03:00 EST
+Last updated 2015-05-03 21:23:10 CDT
 </div>
 </div>
 </body>
