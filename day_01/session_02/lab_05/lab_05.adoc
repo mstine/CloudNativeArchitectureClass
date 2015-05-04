@@ -28,12 +28,13 @@ export HTTP_PROXY=http://webproxy.wlb2.nam.nsroot.net:8080/
 $ cf api api.nyc.fe.pivotal.io --skip-ssl-validation
 ----
 
-. Your username will be your employee ID. Password will be provided in the class
-. Follow the steps above for login
-. Create your own space:
+. Your username will be your employee ID. Password will be provided in the class.
+. Follow the steps above for login.
+. Create your own space and target that space:
 
 ----
 $ cf create-space <your_username> -o <your_org>
+$ cf target -s <your_username> -o <your_org>
 ----
 Your org is displayed when you login, it should be either O1 or O2
 
@@ -44,6 +45,20 @@ Your org is displayed when you login, it should be either O1 or O2
 +
 ----
 $ cd $COURSE_HOME/day_01/session_02/lab_05/spring-music
+----
+
+. If you are on a network that is behind an HTTP proxy, you will need to provide some proxy settings to the Gradle build tool so it can download dependencies. In your user home directory, create a directory named `.gradle` and a file named `gradle.properties` in that directory (e.g. `~/.gradle/gradle.properties` on Linux/OSX or `%USERPROFILE%\.gradle\gradle.properties` on Windows). Add lines like these to that file, with the address and credentials for your HTTP proxy: 
++
+----
+systemProp.http.proxyHost=www.example.com
+systemProp.http.proxyPort=8080
+systemProp.http.proxyUser=userid
+systemProp.http.proxyPassword=password
+
+systemProp.https.proxyHost=www.example.com
+systemProp.https.proxyPort=8080
+systemProp.https.proxyUser=userid
+systemProp.https.proxyPassword=password
 ----
 
 . Using the Gradle Wrapper, build and package the application:
