@@ -1,0 +1,442 @@
+:compat-mode:
+= Lab 11 - Build a Product Search/Details Service using PostgreSQL
+
+[abstract]
+--
+In this lab we'll begin the first subproject of our complete cloud-native application architecture: _SpringBox_, which implements the movie browsing portion of a ``Redbox-like'' website.
+This microservice will provide the _Movie Catalog Service_, which will allow us to browse movies by genre, browse an individual movie's details, and search for movies.
+
+We'll be using the http://grouplens.org/datasets/movielens/[MovieLens] dataset, and we'll model it's `Movie` and `Genre` concepts in this microservice.
+--
+
+NOTE: The completed code for this lab can be found at `$COURSE_HOME/day_01/session_04/lab_11/complete/springbox-catalog`.
+
+
+== Developing the Service
+
+. Change to the lab directory:
++
+----
+$ cd $COURSE_HOME/day_01/session_04/lab_11/initial/springbox-catalog
+----
++
+and import the project (via `pom.xml`) into your IDE of choice.
+
+. Start by adding a dependency on the http://hsqldb.org/[HyperSQL in-memory database] to `pom.xml`:
++
+----
+<dependency>
+  <groupId>org.hsqldb</groupId>
+  <artifactId>hsqldb</artifactId>
+</dependency>
+----
+
+. Create the package `io.springbox.catalog.domain` and in that package create the class `Genre`. Into that file you can paste the following source code, which models the MovieLens `Genre` concept:
++
+----
+@Entity
+@Table(name = "genres")
+public class Genre {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(nullable = false)
+    private String mlId;
+
+    @Column(nullable = false)
+    private String name;
+
+    @ManyToMany(mappedBy = "genres")
+    @JsonIgnore
+    private List<Movie> movies;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getMlId() {
+        return mlId;
+    }
+
+    public void setMlId(String mlId) {
+        this.mlId = mlId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Movie> getMovies() {
+        return movies;
+    }
+
+    public void setMovies(List<Movie> movies) {
+        this.movies = movies;
+    }
+}
+----
++
+Notice that we're using JPA annotations on the class and its fields. You'll need to use your IDE's features to add the appropriate import statements.
+This class won't compile just yet, and we'll fix that in the next step.
+
+. Also in the `io.springbox.catalog.domain` package,  create the class `Movie`. Into that file you can paste the following source code, which models the MovieLens `Movie` concept:
++
+----
+@Entity
+@Table(name = "movies")
+public class Movie {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String mlId;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "movies_genres",
+            joinColumns = {@JoinColumn(name = "movie_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "genre_id", referencedColumnName = "id")})
+    private List<Genre> genres;
+
+    @Column(nullable = false)
+    private int numberInStock;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genres = genres;
+    }
+
+    public String getMlId() {
+        return mlId;
+    }
+
+    public void setMlId(String mlId) {
+        this.mlId = mlId;
+    }
+}
+----
++
+Once again, use the IDE to add the appropriate import statements.
+At this point, both `Movie` and `Genre` should compile.
+
+. Create the package `io.springbox.catalog.repositories` and in that package create the interface `GenreRepository`. Paste the following code and add appropriate imports:
++
+----
+public interface GenreRepository extends CrudRepository<Genre, Long> {
+    Genre findByMlId(String mlId);
+}
+----
+
+. Also in the `io.springbox.catalog.repositories` package,  create the interface `MovieRepository`. Paste the following code and add appropriate imports:
++
+----
+public interface MovieRepository extends CrudRepository<Movie, Long> {
+    public Movie findByMlId(String mlId);
+}
+----
+
+. Create the package `io.springbox.catalog.controllers` and in that package create the class `GenreController`. Paste the following code and add appropriate imports:
++
+----
+@RestController
+public class GenreController {
+
+    @Autowired
+    GenreRepository genreRepository;
+
+    @RequestMapping(value = "/genres", method = RequestMethod.GET)
+    public Iterable<Genre> genres() {
+        return genreRepository.findAll();
+    }
+
+    @RequestMapping(value = "/genres/{mlId}", method = RequestMethod.GET)
+    public Genre genre(@PathVariable String mlId) {
+        return genreRepository.findByMlId(mlId);
+    }
+}
+----
+
+. Also in the `io.springbox.catalog.controllers` package,  create the class `MovieController`. Paste the following code and add appropriate imports:
++
+----
+@RestController
+public class MovieController {
+
+    @Autowired
+    MovieRepository movieRepository;
+
+    @RequestMapping(value = "/movies", method = RequestMethod.GET)
+    public Iterable<Movie> movies() {
+        return movieRepository.findAll();
+    }
+
+    @RequestMapping(value = "/movies/{mlId}", method = RequestMethod.GET)
+    public Movie movie(@PathVariable String mlId) {
+        return movieRepository.findByMlId(mlId);
+    }
+}
+----
+
+. Add the `@EnableJpaRepositories` annotation to `io.springbox.catalog.SpringboxCatalogApplication`:
++
+----
+@SpringBootApplication
+@EnableJpaRepositories // <--- Add this!
+public class SpringboxCatalogApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxCatalogApplication.class, args);
+    }
+}
+----
+
+. Take a look at `src/main/resources/import.sql`, which has already been provided in your project.
+It contains the MovieLens dataset imports that we'll be using (excerpt here):
++
+----
+insert into genres (name,ml_id,id) values ('unknown',0,1000);
+insert into genres (name,ml_id,id) values ('Action',1,1001);
+insert into genres (name,ml_id,id) values ('Adventure',2,1002);
+insert into genres (name,ml_id,id) values ('Animation',3,1003);
+insert into genres (name,ml_id,id) values ('Children''s',4,1004);
+insert into genres (name,ml_id,id) values ('Comedy',5,1005);
+insert into genres (name,ml_id,id) values ('Crime',6,1006);
+insert into genres (name,ml_id,id) values ('Documentary',7,1007);
+insert into genres (name,ml_id,id) values ('Drama',8,1008);
+insert into genres (name,ml_id,id) values ('Fantasy',9,1009);
+insert into genres (name,ml_id,id) values ('Film-Noir',10,1010);
+insert into genres (name,ml_id,id) values ('Horror',11,1011);
+insert into genres (name,ml_id,id) values ('Musical',12,1012);
+insert into genres (name,ml_id,id) values ('Mystery',13,1013);
+insert into genres (name,ml_id,id) values ('Romance',14,1014);
+insert into genres (name,ml_id,id) values ('Sci-Fi',15,1015);
+insert into genres (name,ml_id,id) values ('Thriller',16,1016);
+insert into genres (name,ml_id,id) values ('War',17,1017);
+insert into genres (name,ml_id,id) values ('Western',18,1018);
+
+insert into movies(id,title,ml_id,number_in_stock) values (1000,'Toy Story (1995)','1',10);
+insert into movies_genres(movie_id, genre_id) values (1000,1003);
+insert into movies_genres(movie_id, genre_id) values (1000,1004);
+insert into movies_genres(movie_id, genre_id) values (1000,1005);
+insert into movies(id,title,ml_id,number_in_stock) values (1001,'GoldenEye (1995)','2',10);
+insert into movies_genres(movie_id, genre_id) values (1001,1001);
+insert into movies_genres(movie_id, genre_id) values (1001,1002);
+insert into movies_genres(movie_id, genre_id) values (1001,1016);
+insert into movies(id,title,ml_id,number_in_stock) values (1002,'Four Rooms (1995)','3',10);
+insert into movies_genres(movie_id, genre_id) values (1002,1016);
+insert into movies(id,title,ml_id,number_in_stock) values (1003,'Get Shorty (1995)','4',10);
+insert into movies_genres(movie_id, genre_id) values (1003,1001);
+insert into movies_genres(movie_id, genre_id) values (1003,1005);
+insert into movies_genres(movie_id, genre_id) values (1003,1008);
+----
+
+. Build the JAR:
++
+----
+$ mvn package
+----
+
+. Run the application:
++
+----
+$ java -jar target/springbox-catalog-0.0.1-SNAPSHOT.jar
+----
+
+. Access the application using `curl` to make sure everything is working properly:
++
+----
+$ curl -i localhost:8080/movies/1
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8Date: Mon, 16 Feb 2015 03:38:42 GMTServer: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: application
+
+{
+    "genres": [
+        {
+            "id": 1003,
+            "mlId": "3",
+            "name": "Animation"
+        },
+        {
+            "id": 1004,
+            "mlId": "4",
+            "name": "Children's"
+        },
+        {
+            "id": 1005,
+            "mlId": "5",
+            "name": "Comedy"
+        }
+    ],
+    "id": 1000,
+    "mlId": "1",
+    "title": "Toy Story (1995)"
+}
+----
+
+== Preparing for Cloud Foundry
+
+. We want to bind to a PostgreSQL data source when running on PWS, so let's create one:
++
+----
+$ cf cs elephantsql turtle springbox-catalog-db
+Creating service springbox-catalog-db in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
+
+. Add the appropriate dependencies for PostgreSQL's JDBC driver and the Spring Cloud Connectors:
++
+----
+<dependency>
+  <groupId>postgresql</groupId>
+  <artifactId>postgresql</artifactId>
+  <version>9.1-901-1.jdbc4</version>
+</dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-cloudfoundry-connector</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-spring-service-connector</artifactId>
+</dependency>
+----
+
+.  Rename `src/main/resources/application.properties` file to `src/main/resources/application.yml` file.
+YAML files make it much easier to represent multiple Spring profiles.
+This will allow us to run locally with HSQLDB and on PWS with PostgreSQL.
+
+. Paste the following into `application.yml`:
++
+----
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+---
+
+spring:
+  profiles: default
+  jpa:
+    database: HSQL
+
+---
+
+spring:
+  profiles: cloud
+  jpa:
+    database: POSTGRESQL
+----
+
+. Rebuild the JAR:
++
+----
+$ mvn package
+----
+
+== Deploying to Cloud Foundry
+
+. Create an application manifest in `manifest.yml`:
++
+[source,yml]
+----
+---
+applications:
+- name: springbox-catalog
+  host: springbox-catalog-${random-word}
+  memory: 512M
+  instances: 1
+  path: target/springbox-catalog-0.0.1-SNAPSHOT.jar
+  env:
+    SPRING_PROFILES_ACTIVE: cloud
+  services:
+    - springbox-catalog-db
+----
+
+. Push to Cloud Foundry:
++
+----
+$ cf push
+
+...
+
+Showing health and status for app springbox-catalog in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+
+requested state: started
+instances: 1/1
+usage: 512M x 1 instances
+urls: springbox-catalog-overwild-nonrevival.cfapps.io
+last uploaded: Mon Feb 16 19:34:38 UTC 2015
+
+     state     since                    cpu    memory           disk
+#0   running   2015-02-16 11:36:05 AM   0.0%   401.5M of 512M   127.5M of 1G
+----
+
+. Access the application using `curl` at the random route provided by CF:
++
+----
+$ curl -i springbox-catalog-overwild-nonrevival.cfapps.io/movies/1
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8Date: Mon, 16 Feb 2015 03:38:42 GMTServer: Apache-Coyote/1.1
+Transfer-Encoding: chunked
+X-Application-Context: application
+
+{
+    "genres": [
+        {
+            "id": 1003,
+            "mlId": "3",
+            "name": "Animation"
+        },
+        {
+            "id": 1004,
+            "mlId": "4",
+            "name": "Children's"
+        },
+        {
+            "id": 1005,
+            "mlId": "5",
+            "name": "Comedy"
+        }
+    ],
+    "id": 1000,
+    "mlId": "1",
+    "title": "Toy Story (1995)"
+}
+----

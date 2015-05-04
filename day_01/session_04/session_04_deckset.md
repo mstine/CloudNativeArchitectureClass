@@ -1,4 +1,3 @@
-footer: © 2015 Matt Stine
 slidenumbers: true
 
 # [fit] Cloud-Native
@@ -9,21 +8,9 @@ slidenumbers: true
 
 ---
 
-![left](../../Common/images/mattmug.jpeg)
-# Me
-
-Matt Stine ([@mstine](http://twitter.com/mstine))
-Senior Product Manager
-Pivotal
-[http://www.mattstine.com](http://www.mattstine.com)
-[matt.stine@gmail.com](mailto:matt.stine@gmail.com)
-
----
-
 # [fit] Session
-# [fit] 4
+# [fit] Four
 ![](../../Common/images/cf_logo.png)
-
 
 ---
 
@@ -34,3 +21,47 @@ Pivotal
 # [fit] Part 2
 
 ---
+
+# [fit] SpringBox!
+
+---
+
+![inline fit](../../Common/images/redbox.png)
+
+---
+
+# We'll implement the front-end of this service...
+
+---
+
+# Imagine 4 Teams:
+
+- Movie Catalog
+- Movie Reviews
+- Movie Recommendations
+- Web UI
+
+---
+
+# SpringBox High-Level Architecture
+![inline](../../Common/images/API_Gateway.png)
+
+---
+
+# In this session...
+
+- Movie Catalog (MySQL)
+- Movie Reviews (MongoDB)
+- Movie Recommendations (Neo4J)
+- All via Spring Data
+
+---
+
+# Tomorrow...
+
+We'll start using distributed system patterns to glue it all together!
+
+---
+
+# [fit] TO THE
+# [Fit] LABS!
