@@ -57,21 +57,21 @@ $ git checkout citi
 
 === Day One
 
-* link:day_01/session_01/session_01.pdf[Session 1 Slides]
+* Session 1 (link:day_01/session_01/session_01.pdf[Slides])
 ** link:day_01/session_01/lab_01/lab_01.html[Lab 1 - Getting Started with Spring Boot]
 ** link:day_01/session_01/lab_02/lab_02.html[Lab 2 - Deploying a Web Application with an Embedded Container]
 ** link:day_01/session_01/lab_03/lab_03.html[Lab 3 - Externalizing Configuration with Spring Boot]
 ** link:day_01/session_01/lab_04/lab_04.html[Lab 4 - Introspection, Monitoring, and Metrics using Spring Boot Actuator]
-* link:day_01/session_02/session_02.pdf[Session 2 Slides]
+* Session 2
 ** link:day_01/session_02/lab_05/lab_05.html[Lab 5 - From Zero to Pushing Your First Application]
 ** link:day_01/session_02/lab_06/lab_06.html[Lab 6 - Binding to Cloud Foundry Services]
 ** link:day_01/session_02/lab_07/lab_07.html[Lab 7 - Scaling Applications]
 ** link:day_01/session_02/lab_08/lab_08.html[Lab 8 - Monitoring Applications]
-* link:day_01/session_03/session_03.pdf[Session 3 Slides]
+* Session 3
 ** link:day_01/session_03/lab_09/lab_09.html[Lab 9 - Build a Hypermedia-Driven RESTful Web Service with Spring Data REST]
 ** link:day_01/session_03/lab_10/lab_10.html[Lab 10 - Leveraging Spring Cloud Connectors for Service Binding]
-** link:day_01/session_03/lab_11/lab_11.html[Lab 11 - Build a Product Search/Details Service using PostgreSQL]
-* link:day_01/session_04/session_04.pdf[Session 4 Slides]
+* Session 4 (link:day_01/session_04/session_04.pdf[Slides])
+** link:day_01/session_04/lab_11/lab_11.html[Lab 11 - Build a Product Search/Details Service using PostgreSQL]
 ** link:day_01/session_04/lab_12/lab_12.html[Lab 12 - Build a Product Review Service with MongoDB]
 ** link:day_01/session_04/lab_13/lab_13.html[Lab 13 - Build a Product Recommendation Service with Neo4J]
 
