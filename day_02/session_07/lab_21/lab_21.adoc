@@ -1,1 +1,14 @@
 = Lab 21 - Creating an OAuth2 Authorization Server
+
+== Testing it out
+To test the authentication server execute a simple POST to the /uaa/oauth/token endpoint, you will need to set the following headers:
+
+. Authorization : Basic + a base64 encoded string of the clientId:clientSecret, on this example it will be acme:acmesecret
+. Content-Type : application/x-www-form-urlencoded
+. Payload: grant_type=password&username=<username>&password=<password>
+  
++
+----
+curl -XPOST -H "Content-Type: application/x-www-form-urlencoded"  -H "Authorization: Basic YWNtZTphY21lc2VjcmV0"  http://springbox-auth-server-snakiest-doggerel.nyc.fe.pivotal.io/uaa/oauth/token -d "grant_type=password&username=mstine&password=secret"
+----
+

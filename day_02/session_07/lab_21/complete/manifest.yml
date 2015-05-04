@@ -2,6 +2,7 @@
 applications:
 - name: springbox-auth-server
   host: springbox-auth-server-${random-word}
+  domain: nyc.fe.pivotal.io
   memory: 512M
   instances: 1
   path: target/springbox-auth-server-0.0.1-SNAPSHOT.jar
