@@ -25,6 +25,23 @@ $ cf login
 +
 Follow the prompts, choosing `oreilly-class` when prompted for an organization and `studentXX` when prompted for a space.
 
+== Workshop labs
+
+
+----
+$ cf api api.nyc.fe.pivotal.io --skip-ssl-validation
+----
+
+. Your username will be your employee ID. Password will be provided in the class
+. Follow the steps above for login
+. Create your own space:
+
+----
+$ cf create-space <your_username> -o <your_org>
+----
+Your org is displayed when you login, it should be either O1 or O2
+
+
 == Build and Push!
 
 . Change to the _Spring Music_ sample application directory:

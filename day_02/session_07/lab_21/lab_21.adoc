@@ -9,6 +9,9 @@ To test the authentication server execute a simple POST to the /uaa/oauth/token 
   
 +
 ----
-curl -XPOST -H "Content-Type: application/x-www-form-urlencoded"  -H "Authorization: Basic YWNtZTphY21lc2VjcmV0"  http://springbox-auth-server-snakiest-doggerel.nyc.fe.pivotal.io/uaa/oauth/token -d "grant_type=password&username=mstine&password=secret"
+curl -XPOST -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "Authorization: Basic YWNtZTphY21lc2VjcmV0" \
+             http://springbox-auth-server-snakiest-doggerel.nyc.fe.pivotal.io/uaa/oauth/token \ 
+             -d "grant_type=password&username=mstine&password=secret"
 ----
 
