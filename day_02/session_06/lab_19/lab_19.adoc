@@ -8,7 +8,7 @@ However, this time we'll add an implementation of the Circuit Breaker pattern us
 
 In this lab, we'll do the following:
 
-. Refactor the consumer application from link:../../session_06/lab_17/lab_17.html[Lab 17] to add a slightly different `ProducerClient` than we added in link:../../session_06/lab_17/lab_17.html[Lab 18].
+. Refactor the consumer application from link:../../session_06/lab_17/lab_17.html[Lab 17] to add a slightly different `ProducerClient` than we added in link:../../session_06/lab_18/lab_18.html[Lab 18].
 . Test the new consumer version against our local pool of producers
 . Kill one of the producers and watch the consumer failover.
 . Kill the remaining producer and watch the circuit breaker fallback behavior.
@@ -167,3 +167,7 @@ You may get the fallback value of `42` a few times due to the lag in removing th
 . Restart one of the producer processes. Wait for it to register with Eureka.
 
 . Using `curl`, test the consumer application and show that eventually recovers and starts hitting the new producer process. This can take several seconds as the Eureka and Ribbon caches repopulate.
+
+== Next Steps
+
+Do not shut anything down when you complete this lab. We will add one additional component in link:../../session_06/lab_20/lab_20.html[Lab 20].
