@@ -8,9 +8,7 @@ However, this time we'll use a declarative REST repository based on Netflix Feig
 
 In this lab, we'll do the following:
 
-. Change the consumer application from link:../../session_06/lab_17/lab_17.html[Lab 17] to:
-.. Use a `LoadBalancerClient`
-.. Use a `RestTemplate` configured to resolve service names from Ribbon
+. Refactor the consumer application from link:../../session_06/lab_17/lab_17.html[Lab 17] to use a `ProducerClient` enabled by Feign
 . Test the new consumer version against our local pool of producers
 --
 
@@ -47,3 +45,75 @@ $ SERVER_PORT=8082 java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar
 . Ensure you have two instances of the producer service registered in Eureka:
 +
 image::../../../Common/images/ribbon_1.png[]
+
+== Using Feign
+
+. Change to the lab directory:
++
+----
+$ cd $COURSE_HOME/day_02/session_06/lab_18/initial/springbox-consumer
+----
++
+and import the project (via `pom.xml`) into your IDE of choice.
+
+. Add the following dependency to `pom.xml`:
++
+----
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-feign</artifactId>
+</dependency>
+----
+
+. Add a `@EnableFeignClients` annotation to the class `io.springbox.consumer.SpringboxConsumerApplication`.
+
+. Create the interface `io.springbox.consumer.ProducerClient` and into it paste the following code:
++
+----
+@FeignClient("producer")
+public interface ProducerClient {
+
+    @RequestMapping(method = RequestMethod.GET, value = "/")
+    ProducerResponse getValue();
+}
+----
+
+. Refactor the class `io.springbox.consumer.ConsumerController` to autowire the `ProducerClient` instead of `RestTemplate`, and then use it to obtain the `ProducerResponse`:
++
+----
+@Autowired
+ProducerClient client;
+
+@RequestMapping(value = "/", produces = "application/json")
+String consume() {
+    ProducerResponse response = client.getValue();
+    return String.format("{\"value\":%d}", response.getValue());
+}
+----
+
+. Build the application:
++
+----
+$ mvn package
+----
+
+. Run the application:
++
+----
+$ java -jar target/springbox-consumer-0.0.1-SNAPSHOT.jar
+----
+
+. Using `curl`, test the consumer application and show that it is still receiving values from the producers.
+Also, watch the producers and observe that Ribbon is performing round robin load balancing across the two producers:
++
+----
+$ curl -i localhost:8081
+HTTP/1.1 200 OK
+Content-Length: 11
+Content-Type: application/json;charset=UTF-8
+Date: Tue, 24 Feb 2015 05:47:33 GMTServer: Apache-Coyote/1.1X-Application-Context: consumer:8081
+
+{
+  "value": 5
+}
+----
