@@ -81,7 +81,7 @@ $ git checkout citi
 ** link:day_02/session_05/lab_14/lab_14.html[Lab 14 - Deploying and Using Spring Cloud Config Server]
 ** link:day_02/session_05/lab_15/lab_15.html[Lab 15 - Refreshing Configuration with Spring Cloud Bus]
 ** link:day_02/session_05/lab_16/lab_16.html[Lab 16 - Leveraging Eureka for Service Discovery via Spring Cloud Netflix]
-* link:day_02/session_06/session_06.pdf[Session 6 Slides]
+* Session 6 (link:day_02/session_06/session_06.pdf[Slides])
 ** link:day_02/session_06/lab_17/lab_17.html[Lab 17 - Client-Side Load Balancing with Ribbon]
 ** link:day_02/session_06/lab_18/lab_18.html[Lab 18 - Declarative REST Clients with Feign]
 ** link:day_02/session_06/lab_19/lab_19.html[Lab 19 - Fault-Tolerance with Hystrix]
