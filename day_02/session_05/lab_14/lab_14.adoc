@@ -89,25 +89,10 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.0.RC3</version>
+  <version>1.0.2.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
-----
-
-. Add the Spring Milestone repository (as Spring Cloud is still pre-GA):
-+
-----
-<repositories>
-  <repository>
-    <id>spring-milestones</id>
-    <name>Spring Milestones</name>
-    <url>https://repo.spring.io/libs-milestone/</url>
-    <snapshots>
-      <enabled>true</enabled>
-      </snapshots>
-  </repository>
-</repositories>
 ----
 
 . Change the dependency on `spring-boot-starter` to `spring-cloud-starter`:
@@ -200,25 +185,10 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.0.RC3</version>
+  <version>1.0.2.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
-----
-
-. Add the Spring Milestone repository (as Spring Cloud is still pre-GA):
-+
-----
-<repositories>
-  <repository>
-    <id>spring-milestones</id>
-    <name>Spring Milestones</name>
-    <url>https://repo.spring.io/libs-milestone/</url>
-    <snapshots>
-      <enabled>true</enabled>
-      </snapshots>
-  </repository>
-</repositories>
 ----
 
 . Change the dependency on `spring-boot-starter` to `spring-cloud-starter`:
@@ -424,25 +394,10 @@ For each project, perform the following steps (we'll do these once for the `spri
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.0.RC3</version>
+  <version>1.0.2.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
-----
-
-. Add the Spring Milestone repository (as Spring Cloud is still pre-GA):
-+
-----
-<repositories>
-  <repository>
-    <id>spring-milestones</id>
-    <name>Spring Milestones</name>
-    <url>https://repo.spring.io/libs-milestone/</url>
-    <snapshots>
-      <enabled>true</enabled>
-      </snapshots>
-  </repository>
-</repositories>
 ----
 
 . Add a dependency on `spring-cloud-starter`:
