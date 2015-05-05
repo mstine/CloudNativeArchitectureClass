@@ -86,7 +86,7 @@ $ git checkout citi
 ** link:day_02/session_06/lab_18/lab_18.html[Lab 18 - Declarative REST Clients with Feign]
 ** link:day_02/session_06/lab_19/lab_19.html[Lab 19 - Fault-Tolerance with Hystrix]
 ** link:day_02/session_06/lab_20/lab_20.html[Lab 20 - Monitoring Circuit Breakers with Hystrix Dashboard]
-* link:day_02/session_07/session_07.pdf[Session 7 Slides]
+* Session 7 (link:day_02/session_07/session_07.pdf[Slides])
 ** link:day_02/session_07/lab_21/lab_21.html[Lab 21 - Creating an OAuth2 Authorization Server]
 ** link:day_02/session_07/lab_22/lab_22.html[Lab 22 - Securing a Resource Server with Spring Cloud Security]
 * link:day_02/session_08/session_08.pdf[Session 8 Slides]
