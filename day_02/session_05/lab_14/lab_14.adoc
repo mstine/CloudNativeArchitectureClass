@@ -95,6 +95,21 @@ and import the project (via `pom.xml`) into your IDE of choice.
 </parent>
 ----
 
+. Add the following repository to resolve the `1.0.2.RELEASE` artifacts:
++
+----
+<repositories>
+    <repository>
+        <id>spring-release</id>
+        <name>Spring Release</name>
+        <url>https://repo.spring.io/release/</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+----
+
 . Change the dependency on `spring-boot-starter` to `spring-cloud-starter`:
 +
 ----

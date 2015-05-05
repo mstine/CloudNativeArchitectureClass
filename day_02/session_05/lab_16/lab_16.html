@@ -747,6 +747,23 @@ We&#8217;ll use Spring Cloud Netflix to deploy Eureka, which is a component offe
 </div>
 </li>
 <li>
+<p>Add the following repository to resolve the <code>1.0.2.RELEASE</code> artifacts:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;spring-release&lt;/id&gt;
+        &lt;name&gt;Spring Release&lt;/name&gt;
+        &lt;url&gt;https://repo.spring.io/release/&lt;/url&gt;
+        &lt;snapshots&gt;
+            &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;/snapshots&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;</pre>
+</div>
+</div>
+</li>
+<li>
 <p>Add a dependency on <code>spring-cloud-starter-eureka-server</code>:</p>
 <div class="listingblock">
 <div class="content">
@@ -1403,7 +1420,7 @@ last uploaded: Fri Feb 20 02:06:02 UTC 2015
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-05-05 01:20:20 CDT
+Last updated 2015-05-05 11:19:55 CDT
 </div>
 </div>
 </body>
