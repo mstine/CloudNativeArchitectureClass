@@ -344,7 +344,7 @@ public class LocalConfig {
 
     @Bean
     public GraphDatabaseService graphDatabaseService() {
-        return new SpringCypherRestGraphDatabase("http://localhost:7474/db/data/");
+        return new SpringRestGraphDatabase("http://localhost:7474/db/data/");
     }
 
 }
@@ -473,14 +473,13 @@ In this case, it allows us to inject credentials for a service not managed by Cl
 +
 ----
 @Configuration
-@Profile("default")
-public class LocalConfig {
+@Profile("cloud")
+public class CloudConfig extends AbstractCloudConfig {
 
     @Bean
-    public GraphDatabaseService graphDatabaseService() {
-        return new SpringCypherRestGraphDatabase("http://localhost:7474/db/data/");
+    GraphDatabaseService graphDatabaseService() {
+        return connectionFactory().service(GraphDatabaseService.class);
     }
-
 }
 ----
 
