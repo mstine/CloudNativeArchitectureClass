@@ -191,10 +191,10 @@ X-Application-Context: application:8081
 
 == Preparing for Cloud Foundry
 
-. We want to bind to a MongoLab data source when running on PWS, so let's create one:
+. We want to bind to a MongoDB data source when running on Cloud Foundry, so let's create one:
 +
 ----
-$ cf cs mongolab sandbox springbox-reviews-db
+$ cf cs p-mongodb development springbox-reviews-db
 Creating service springbox-reviews-db in org oreilly-class / space instructor as mstine@pivotal.io...
 OK
 ----

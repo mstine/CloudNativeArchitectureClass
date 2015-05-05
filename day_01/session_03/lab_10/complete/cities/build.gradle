@@ -13,7 +13,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'spring-boot' 
+apply plugin: 'spring-boot'
 
 jar {
     baseName = 'cities'
@@ -36,7 +36,7 @@ dependencies {
     // runtime("org.hsqldb:hsqldb")
     compile("org.springframework.cloud:spring-cloud-spring-service-connector:1.1.0.RELEASE")
     compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.1.0.RELEASE")
-    runtime("postgresql:postgresql:9.1-901-1.jdbc4")
+    runtime("org.mariadb.jdbc:mariadb-java-client:1.1.7")
 }
 
 eclipse {

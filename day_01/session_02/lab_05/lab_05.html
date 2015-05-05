@@ -686,6 +686,48 @@ b.conum * { color: inherit !important; }
 </div>
 <div id="content">
 <div class="sect1">
+<h2 id="_pws_setup_new">PWS Setup (NEW!)</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Make sure you&#8217;ve created a Pivotal Web Services (PWS) account as indicated in the prerequisites.</p>
+</li>
+<li>
+<p>Enter your username (the email address you used to register with PWS) on any unused row of the class <a href="https://docs.google.com/spreadsheets/d/1kMlV-D3pIVQfhsDDcfFXDgYRsZk7zY7i-dQy0n098_E">Google Sheet</a>.</p>
+</li>
+<li>
+<p>We&#8217;ll run a script that gets everyone added to the appropriate space on PWS.</p>
+</li>
+<li>
+<p>Once we&#8217;ve run this script, you should be able to start the lab.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_registration_steps_wip">Registration Steps (WIP):</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Make sure you&#8217;ve created a Pivotal Web Services (PWS) account as indicated in the prerequisites.</p>
+</li>
+<li>
+<p>Enter your username (the email address you used to register with PWS) on any unused row of the class <a href="https://docs.google.com/spreadsheets/d/1kMlV-D3pIVQfhsDDcfFXDgYRsZk7zY7i-dQy0n098_E">Google Sheet</a>.</p>
+</li>
+<li>
+<p>We&#8217;ll run a script that gets everyone added to the appropriate space on PWS.</p>
+</li>
+<li>
+<p>Once we&#8217;ve run this script, you should be able to start the lab.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_setup">Setup</h2>
 <div class="sectionbody">
 <div class="olist arabic">
@@ -707,19 +749,20 @@ b.conum * { color: inherit !important; }
 </div>
 </li>
 <li>
-<p>Your username will be your employee ID. Password will be provided in the class</p>
+<p>Your username will be your employee ID. Password will be provided in the class.</p>
 </li>
 <li>
-<p>Follow the steps above for login</p>
+<p>Follow the steps above for login.</p>
 </li>
 <li>
-<p>Create your own space:</p>
+<p>Create your own space and target that space:</p>
 </li>
 </ol>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ cf create-space &lt;your_username&gt; -o &lt;your_org&gt;</pre>
+<pre>$ cf create-space &lt;your_username&gt; -o &lt;your_org&gt;
+$ cf target -s &lt;your_username&gt; -o &lt;your_org&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -737,6 +780,22 @@ b.conum * { color: inherit !important; }
 <div class="listingblock">
 <div class="content">
 <pre>$ cd $COURSE_HOME/day_01/session_02/lab_05/spring-music</pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you are on a network that is behind an HTTP proxy, you will need to provide some proxy settings to the Gradle build tool so it can download dependencies. In your user home directory, create a directory named <code>.gradle</code> and a file named <code>gradle.properties</code> in that directory (e.g. <code>~/.gradle/gradle.properties</code> on Linux/OSX or <code>%USERPROFILE%\.gradle\gradle.properties</code> on Windows). Add lines like these to that file, with the address and credentials for your HTTP proxy:</p>
+<div class="listingblock">
+<div class="content">
+<pre>systemProp.http.proxyHost=www.example.com
+systemProp.http.proxyPort=8080
+systemProp.http.proxyUser=userid
+systemProp.http.proxyPassword=password
+
+systemProp.https.proxyHost=www.example.com
+systemProp.https.proxyPort=8080
+systemProp.https.proxyUser=userid
+systemProp.https.proxyPassword=password</pre>
 </div>
 </div>
 </li>
@@ -884,7 +943,7 @@ It will become important in the next lab!</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-05-04 11:26:21 CDT
+Last updated 2015-05-04 20:20:02 CDT
 </div>
 </div>
 </body>

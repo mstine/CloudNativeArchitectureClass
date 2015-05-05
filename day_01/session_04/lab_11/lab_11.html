@@ -5,7 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.2">
-<title>Lab 11 - Build a Product Search/Details Service using PostgreSQL</title>
+<title>Lab 11 - Build a Product Search/Details Service using MySQL</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
 /* ========================================================================== HTML5 display definitions ========================================================================== */
@@ -682,7 +682,7 @@ b.conum * { color: inherit !important; }
 </head>
 <body class="article">
 <div id="header">
-<h1>Lab 11 - Build a Product Search/Details Service using PostgreSQL</h1>
+<h1>Lab 11 - Build a Product Search/Details Service using MySQL</h1>
 </div>
 <div id="content">
 <div id="preamble">
@@ -1050,23 +1050,23 @@ X-Application-Context: application
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>We want to bind to a PostgreSQL data source when running on PWS, so let&#8217;s create one:</p>
+<p>We want to bind to a MySQL data source when running on Cloud Foundry, so let&#8217;s create one:</p>
 <div class="listingblock">
 <div class="content">
-<pre>$ cf cs elephantsql turtle springbox-catalog-db
+<pre>$ cf cs p-mysql 100mb-dev springbox-catalog-db
 Creating service springbox-catalog-db in org oreilly-class / space instructor as mstine@pivotal.io...
 OK</pre>
 </div>
 </div>
 </li>
 <li>
-<p>Add the appropriate dependencies for PostgreSQL&#8217;s JDBC driver and the Spring Cloud Connectors:</p>
+<p>Add the appropriate dependencies for MySQL&#8217;s JDBC driver and the Spring Cloud Connectors:</p>
 <div class="listingblock">
 <div class="content">
 <pre>&lt;dependency&gt;
-  &lt;groupId&gt;postgresql&lt;/groupId&gt;
-  &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
-  &lt;version&gt;9.1-901-1.jdbc4&lt;/version&gt;
+  &lt;groupId&gt;org.mariadb.jdbc&lt;/groupId&gt;
+  &lt;artifactId&gt;mariadb-java-client&lt;/artifactId&gt;
+  &lt;version&gt;1.1.7&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
@@ -1105,7 +1105,7 @@ spring:
 spring:
   profiles: cloud
   jpa:
-    database: POSTGRESQL</pre>
+    database: MYSQL</pre>
 </div>
 </div>
 </li>
@@ -1208,7 +1208,7 @@ X-Application-Context: application
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-05-03 23:48:42 CDT
+Last updated 2015-05-04 15:31:08 CDT
 </div>
 </div>
 </body>
