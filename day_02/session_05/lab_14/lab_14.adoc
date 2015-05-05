@@ -189,7 +189,7 @@ X-Application-Context: bootstrap:8888
 . Change to the lab directory:
 +
 ----
-$ cd $COURSE_HOME/day_02/session_05/lab_14/initial/configTest
+$ cd $COURSE_HOME/day_02/session_05/lab_14/initial/springbox-config-client
 ----
 +
 and import the project (via `pom.xml`) into your IDE of choice.
