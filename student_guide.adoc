@@ -77,7 +77,7 @@ $ git checkout citi
 
 === Day Two
 
-* link:day_02/session_05/session_05.pdf[Session 5 Slides]
+* Session 5 (link:day_02/session_05/session_05.pdf[Slides])
 ** link:day_02/session_05/lab_14/lab_14.html[Lab 14 - Deploying and Using Spring Cloud Config Server]
 ** link:day_02/session_05/lab_15/lab_15.html[Lab 15 - Refreshing Configuration with Spring Cloud Bus]
 ** link:day_02/session_05/lab_16/lab_16.html[Lab 16 - Leveraging Eureka for Service Discovery via Spring Cloud Netflix]
