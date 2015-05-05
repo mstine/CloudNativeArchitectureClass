@@ -431,6 +431,14 @@ last uploaded: Thu Feb 19 07:40:21 UTC 2015
 +
 image::../../../Common/images/eureka_1.png[]
 
+. Create a user-provided service representing the Eureka server (be sure to use the route assigned to your Eureka server!):
++
+----
+$ cf cups springbox-service-registry -p '{"uri":"http://springbox-service-registry-unmaritime-acidification.cfapps.io"}'
+Creating user provided service springbox-service-registry in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
+
 == Update the Microservices to Use Eureka
 
 . In the config repo, update the eureka section of application.yml:
