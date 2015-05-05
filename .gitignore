@@ -4,5 +4,6 @@ build
 .gradle
 *.iml
 *.iws
+.idea
 *.ipr
 target

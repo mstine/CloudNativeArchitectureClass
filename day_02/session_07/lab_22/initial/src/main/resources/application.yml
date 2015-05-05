@@ -1,0 +1,9 @@
+spring:
+  oauth2:
+    client:
+      accessTokenUri: http://springbox-auth-server-snakiest-doggerel.nyc.fe.pivotal.io/uaa/oauth/token
+      userAuthorizationUri: http://springbox-auth-server-snakiest-doggerel.nyc.fe.pivotal.io/uaa/oauth/authorize
+      clientId: acme
+      clientSecret: acmesecret
+    resource:
+      userInfoUri: http://springbox-auth-server-snakiest-doggerel.nyc.fe.pivotal.io//uaa/user

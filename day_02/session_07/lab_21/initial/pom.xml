@@ -12,10 +12,9 @@
 	<description>SpringBox Authentication Server</description>
 
 	<parent>
-		<groupId>io.springbox</groupId>
-		<artifactId>springbox-cloud</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-starter-parent</artifactId>
+		<version>1.0.1.RELEASE</version>
 	</parent>
 
 	<properties>
