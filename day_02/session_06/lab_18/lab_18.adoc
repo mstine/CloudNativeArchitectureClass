@@ -1,1 +1,49 @@
 = Lab 18 - Declarative REST Clients with Feign
+
+[abstract]
+--
+Let's continue learning the components found in Spring Cloud to implement patterns for distributed systems.
+We'll again use Spring Cloud Netflix to implement client-side load balancing with Ribbon.
+However, this time we'll use a declarative REST repository based on Netflix Feign.
+
+In this lab, we'll do the following:
+
+. Change the consumer application from link:../../session_06/lab_17/lab_17.html[Lab 17] to:
+.. Use a `LoadBalancerClient`
+.. Use a `RestTemplate` configured to resolve service names from Ribbon
+. Test the new consumer version against our local pool of producers
+--
+
+== Setup
+
+. A completed `springbox-config-server` project has been placed in `$COURSE_HOME/day_02/session_06/lab_18/initial/springbox-config-server` for your convenience.
+In a terminal window, change to that directory, rebuild, and run the application:
++
+----
+$ cd $COURSE_HOME/day_02/session_06/lab_18/initial/springbox-config-server
+$ mvn package
+$ java -jar target/springbox-config-server-0.0.1-SNAPSHOT.jar
+----
+
+. A completed `springbox-eureka` project has been placed in `$COURSE_HOME/day_02/session_06/lab_18/initial/springbox-eureka` for your convenience.
+In a separate terminal window, change to that directory, rebuild, and run the application:
++
+----
+$ cd $COURSE_HOME/day_02/session_06/lab_18/initial/springbox-eureka
+$ mvn package
+$ java -jar target/springbox-eureka-0.0.1-SNAPSHOT.jar
+----
+
+. A completed `springbox-producer` project has been placed in `$COURSE_HOME/day_02/session_06/lab_18/initial/springbox-producer` for your convenience.
+In two separate terminal windows, change to that directory, rebuild, and run the application (on different ports):
++
+----
+$ cd $COURSE_HOME/day_02/session_06/lab_18/initial/springbox-producer
+$ mvn package
+$ SERVER_PORT=8080 java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar
+$ SERVER_PORT=8082 java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar
+----
+
+. Ensure you have two instances of the producer service registered in Eureka:
++
+image::../../../Common/images/ribbon_1.png[]
