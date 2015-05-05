@@ -30,13 +30,13 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.2.RELEASE</version>
+  <version>1.0.1.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
 ----
 
-. Add the following repository to resolve the `1.0.2.RELEASE` artifacts:
+. Add the following repository to resolve the `1.0.1.RELEASE` artifacts:
 +
 ----
 <repositories>
@@ -142,7 +142,7 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.2.RELEASE</version>
+  <version>1.0.1.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
@@ -269,7 +269,7 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.2.RELEASE</version>
+  <version>1.0.1.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
