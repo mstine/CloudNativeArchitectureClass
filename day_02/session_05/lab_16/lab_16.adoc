@@ -146,7 +146,7 @@ and import the project (via `pom.xml`) into your IDE of choice.
 </dependency>
 ----
 
-. In the package `io.springbox.producer`, create the class `GreetingController`.
+. In the package `io.springbox.producer`, create the class `ProducerController`.
 Into that class paste the following code:
 +
 ----
@@ -210,7 +210,7 @@ In a different terminal window, change to that directory, rebuild, and run the a
 +
 ----
 $ cd $COURSE_HOME/day_02/session_05/lab_16/initial/springbox-config-server
-$ mvn packaage
+$ mvn package
 $ java -jar target/springbox-config-server-0.0.1-SNAPSHOT.jar
 ----
 
