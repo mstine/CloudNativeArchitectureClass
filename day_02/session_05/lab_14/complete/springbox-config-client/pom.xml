@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>io.springbox</groupId>
-	<artifactId>springbox-config-server</artifactId>
+	<artifactId>springbox-config-client</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>springbox-config-server</name>
+	<name>springbox-config-client</name>
 	<description>SpringBox Config Server</description>
 
 	<parent>
@@ -21,7 +21,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<start-class>io.springbox.configserver.SpringboxConfigServerApplication</start-class>
+		<start-class>io.springbox.configclient.SpringboxConfigClientApplication</start-class>
 		<java.version>1.8</java.version>
 	</properties>
 

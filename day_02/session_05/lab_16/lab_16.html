@@ -739,10 +739,27 @@ We&#8217;ll use Spring Cloud Netflix to deploy Eureka, which is a component offe
 <pre>&lt;parent&gt;
   &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
   &lt;artifactId&gt;spring-cloud-starter-parent&lt;/artifactId&gt;
-  &lt;version&gt;1.0.2.RELEASE&lt;/version&gt;
+  &lt;version&gt;1.0.1.RELEASE&lt;/version&gt;
   &lt;relativePath/&gt;
   &lt;!-- lookup parent from repository --&gt;
 &lt;/parent&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add the following repository to resolve the <code>1.0.1.RELEASE</code> artifacts:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;spring-release&lt;/id&gt;
+        &lt;name&gt;Spring Release&lt;/name&gt;
+        &lt;url&gt;https://repo.spring.io/release/&lt;/url&gt;
+        &lt;snapshots&gt;
+            &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;/snapshots&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;</pre>
 </div>
 </div>
 </li>
@@ -864,7 +881,7 @@ eureka:
 <pre>&lt;parent&gt;
   &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
   &lt;artifactId&gt;spring-cloud-starter-parent&lt;/artifactId&gt;
-  &lt;version&gt;1.0.2.RELEASE&lt;/version&gt;
+  &lt;version&gt;1.0.1.RELEASE&lt;/version&gt;
   &lt;relativePath/&gt;
   &lt;!-- lookup parent from repository --&gt;
 &lt;/parent&gt;</pre>
@@ -1027,7 +1044,7 @@ $ java -jar target/springbox-config-server-0.0.1-SNAPSHOT.jar</pre>
 <pre>&lt;parent&gt;
   &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
   &lt;artifactId&gt;spring-cloud-starter-parent&lt;/artifactId&gt;
-  &lt;version&gt;1.0.2.RELEASE&lt;/version&gt;
+  &lt;version&gt;1.0.1.RELEASE&lt;/version&gt;
   &lt;relativePath/&gt;
   &lt;!-- lookup parent from repository --&gt;
 &lt;/parent&gt;</pre>
@@ -1228,6 +1245,16 @@ last uploaded: Thu Feb 19 07:40:21 UTC 2015
 </div>
 </div>
 </li>
+<li>
+<p>Create a user-provided service representing the Eureka server (be sure to use the route assigned to your Eureka server!):</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cf cups springbox-service-registry -p '{"uri":"http://springbox-service-registry-unmaritime-acidification.cfapps.io"}'
+Creating user provided service springbox-service-registry in org oreilly-class / space instructor as mstine@pivotal.io...
+OK</pre>
+</div>
+</div>
+</li>
 </ol>
 </div>
 </div>
@@ -1403,7 +1430,7 @@ last uploaded: Fri Feb 20 02:06:02 UTC 2015
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-05-05 01:20:20 CDT
+Last updated 2015-05-05 16:03:29 CDT
 </div>
 </div>
 </body>

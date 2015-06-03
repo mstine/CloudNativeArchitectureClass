@@ -369,8 +369,9 @@ public class SpringboxRecommendationsApplication {
 server.port=8082
 ----
 
-. To run the application locally, you'll need a local Neo4J install.
-You can download the Neo4J Community Edition (you must use version 2.1.x) http://neo4j.com/download/[here].
+. To run the application locally, you'll need a local Neo4J install.  You can alternatively skip running locally and avoid 
+installing Neo4J on your machine.
+Otherwise, you need to download the Neo4J Community Edition (you must use version 2.1.x) http://neo4j.com/download/[here].
 
 . Build the JAR:
 +
@@ -486,7 +487,7 @@ public class CloudConfig extends AbstractCloudConfig {
 . Rebuild the JAR:
 +
 ----
-$ mvn package
+$ mvn package -DskipTests
 ----
 
 == Deploying to Cloud Foundry

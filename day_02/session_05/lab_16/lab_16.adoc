@@ -30,10 +30,25 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.2.RELEASE</version>
+  <version>1.0.1.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
+----
+
+. Add the following repository to resolve the `1.0.1.RELEASE` artifacts:
++
+----
+<repositories>
+    <repository>
+        <id>spring-release</id>
+        <name>Spring Release</name>
+        <url>https://repo.spring.io/release/</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
 ----
 
 . Add a dependency on `spring-cloud-starter-eureka-server`:
@@ -127,7 +142,7 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.2.RELEASE</version>
+  <version>1.0.1.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
@@ -254,7 +269,7 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.2.RELEASE</version>
+  <version>1.0.1.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
@@ -415,6 +430,14 @@ last uploaded: Thu Feb 19 07:40:21 UTC 2015
 . In a browser, visit the route assigned to your Eureka server and verify that everything is working properly:
 +
 image::../../../Common/images/eureka_1.png[]
+
+. Create a user-provided service representing the Eureka server (be sure to use the route assigned to your Eureka server!):
++
+----
+$ cf cups springbox-service-registry -p '{"uri":"http://springbox-service-registry-unmaritime-acidification.cfapps.io"}'
+Creating user provided service springbox-service-registry in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
 
 == Update the Microservices to Use Eureka
 

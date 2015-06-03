@@ -55,6 +55,10 @@ $ git checkout citi
 
 == Course Materials
 
+=== Complete Reference Application
+
+https://github.com/spring-cloud-samples/springbox-cloud
+
 === Day One
 
 * Session 1 (link:day_01/session_01/session_01.pdf[Slides])

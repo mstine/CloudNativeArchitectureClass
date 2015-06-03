@@ -144,7 +144,8 @@ public class SpringboxReviewsApplication {
 server.port=8081
 ----
 
-. To run the application locally, you'll need a local MongoDB install.
+. To run the application locally, you'll need a local MongoDB install.  Your can skip ahead to the cloud foundry
+specific instructions to avoid installing and testing against a local MongoDB.
 You can download MongoDB for your platform http://www.mongodb.org/downloads[here].
 If run locally with the default setup, the application will automatically discover it and connect to it.
 
@@ -191,6 +192,7 @@ X-Application-Context: application:8081
 
 == Preparing for Cloud Foundry
 
+
 . We want to bind to a MongoDB data source when running on Cloud Foundry, so let's create one:
 +
 ----
@@ -212,10 +214,10 @@ OK
 </dependency>
 ----
 
-. Rebuild the JAR:
+. Build the JAR:
 +
 ----
-$ mvn package
+$ mvn package -DskipTests
 ----
 
 == Deploying to Cloud Foundry
