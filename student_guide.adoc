@@ -4,17 +4,13 @@ Student Guide
 
 == Instructor Details
 
-Matt Stine (@mstine) +
-Principal Engineer / Senior Project Manager - Pivotal +
-mstine@pivotal.io
+Vinay Upadhya (@vinayu) +
+Sr. Field Engineer - Pivotal +
+vupadhya@pivotal.io
 
-Scott Frederick (@scottyfred) +
-Senior Software Engineer - Pivotal +
+Jonathan Fullam (@jfullam) +
+Field Engineering Manager - Pivotal +
 sfrederick@pivotal.io
-
-Vinicius Carvalho (@vccarvalho) +
-Field Engineer - Pivotal +
-vcarvalho@pivotal.io
 
 == Schedule
 
@@ -28,9 +24,9 @@ NOTE: We will be updating the course materials throughout the class. You will ne
 This can be accomplished as follows:
 
 ----
-$ git clone https://github.com/mstine/CloudNativeArchitectureClass
+$ git clone https://github.com/vinayu/CloudNativeArchitectureClass
 $ git fetch --all
-$ git checkout citi
+$ git checkout adp
 ----
 
 === Day One
