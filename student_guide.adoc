@@ -10,7 +10,7 @@ vupadhya@pivotal.io
 
 Jonathan Fullam (@jfullam) +
 Field Engineering Manager - Pivotal +
-sfrederick@pivotal.io
+jfullam@pivotal.io
 
 == Schedule
 
