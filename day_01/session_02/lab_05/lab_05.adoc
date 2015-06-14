@@ -19,10 +19,9 @@ $ cf api {CF-API-URL} --skip-ssl-validation
 . Create your own space and target that space:
 
 ----
-$ cf create-space <your_username> -o <your_org>
-$ cf target -s <your_username> -o <your_org>
+$ cf create-space <your_username> 
+$ cf target -s <your_username> 
 ----
-Your org is displayed when you login, it should be either O1 or O2
 
 
 == Build and Push!
