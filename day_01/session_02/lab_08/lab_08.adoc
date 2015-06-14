@@ -216,7 +216,7 @@ TIP: Use 'cf restage' to ensure your env variable changes take effect
 $ cf restart cf-scale-boot
 ----
 
-. Refresh the Papertrail browser tab to see log events immediately flowing to the log viewing page:
+. Refresh the Papertrail "Events" tab to see log events immediately flowing to the log viewing page:
 +
 image::../../../Common/images/papertrail_5.png[]
 
