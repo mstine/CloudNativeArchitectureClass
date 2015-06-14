@@ -131,3 +131,14 @@ As you can see, we're back down to only one instance running, and it is in fact 
 . Confirm that by again revisiting the route in the browser and checking the instance index and request counter:
 +
 image::../../../Common/images/cf-scale-boot-unscaled.png[]
+
+== Optional Health Management Exercise
+
+. Scale the application back to more than 1 instance.
+
+. Use the "Kill Switch" button on the application to kill an instance.
+
+. Inspect the Application Dashboard for the "app crashed" events.
+
+. Notice that Pivotal Cloud Foundry automatically starts a new instance to compensate for any failed instancess and there is no downtime throughout the process.
+
