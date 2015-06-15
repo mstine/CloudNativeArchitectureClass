@@ -1,7 +1,7 @@
 :compat-mode:
 = Lab 9 - Build a Hypermedia-Driven RESTful Web Service with Spring Data REST
 
-In this lab we'll utilize Spring Boot, Spring Data, and Spring Data REST to create a fully-functional hypermedia-driven RESTful web service. We'll then deploy it to Cloud Foundry (using Pivotal Web Services).
+In this lab we'll utilize Spring Boot, Spring Data, and Spring Data REST to create a fully-functional hypermedia-driven RESTful web service. We'll then deploy it to Pivotal Cloud Foundry.
 
 NOTE: The completed code for this lab can be found at `$COURSE_HOME/day_01/session_03/lab_09/complete/cities`.
 
