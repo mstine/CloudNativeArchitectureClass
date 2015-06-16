@@ -10,7 +10,7 @@ In this lab, we'll do the following:
 
 . Create a GitHub repository to store our configuration
 . Create a Spring Cloud Config Server and test it with a basic sample application
-. Deploy the Config Server to Pivotal Web Services
+. Deploy the Config Server to Pivotal Cloud Foundry
 . Update our previously developed microservices to source their configuration from the Config Server
 --
 
@@ -424,6 +424,22 @@ For each project, perform the following steps (we'll do these once for the `spri
 </dependency>
 ----
 
+. Add the the following repository to resolve the necessary artifacts
+
++
+----
+<repositories>
+  <repository>
+    <id>spring-milestones</id>
+    <name>Spring Milestones</name>
+    <url>https://repo.spring.io/libs-milestone/</url>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+  </repository>
+</repositories>
+----
+
 . Create the file `src/main/resources/bootstrap.yml` and into that file paste the following (provide the matching application name!):
 +
 ----
@@ -503,3 +519,52 @@ transfer-encoding: chunked
 
 }
 ----
+
+== Configure and Use the Pivotal Cloud Foundry Config Server Marketplace Service
+
+. Create the service
+
++
+----
+$ cf cs p-config-server standard springbox-config-service
+Creating service springbox-config-service in org ACME / space jfullam as jfullam...
+OK
+----
+
+. Add the git repo URL to the newly provisioned config service via the `Manage` link in the Pivotal Application Manager
+
++
+image::../../../Common/images/Service-config-manage.png[]
+
+image::../../../Common/images/config-server-config.png[]
+
+. Bind the springbox-config-service to the 3 microservices
+
++
+----
+$ cf bs springbox-catalog springbox-config-service
+Binding service springbox-config-service to app springbox-catalog in org ACME / space jfullam as jfullam...
+OK
+TIP: Use 'cf restage' to ensure your env variable changes take effect
+
+$ cf bs springbox-reviews springbox-config-service
+Binding service springbox-config-service to app springbox-reviews in org ACME / space jfullam as jfullam...
+OK
+TIP: Use 'cf restage' to ensure your env variable changes take effect
+
+$ cf bs springbox-recommendations springbox-config-service
+Binding service springbox-config-service to app springbox-recommendations in org ACME / space jfullam as jfullam...
+OK
+TIP: Use 'cf restage' to ensure your env variable changes take effect
+----
+
+. Restage the 3 microservices
+
++
+----
+$ cf restage springbox-catalog
+$ cf restage springbox-recommendations
+$ cf restage springbox-reviews
+----
+
+. Test via the `/env` endpoint per micro service using curl or your browser
