@@ -10,7 +10,7 @@ In this lab, we'll do the following:
 
 . Create a Eureka server
 . Create two applications, a ``producer'' and a ``consumer,'' wire them up using Eureka, and test them.
-. Deploy the Eureka server to Pivotal Web Services
+. Deploy the Eureka server to Pivotal Cloud Foundry 
 . Update our previously developed microservices to register themselves with Eureka
 --
 
