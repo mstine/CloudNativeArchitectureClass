@@ -206,7 +206,7 @@ and import the project (via `pom.xml`) into your IDE of choice.
 </parent>
 ----
 
-. Change the dependency on `spring-boot-starter` to `spring-cloud-starter`:
+. Add a dependency:
 +
 ----
 <dependency>
