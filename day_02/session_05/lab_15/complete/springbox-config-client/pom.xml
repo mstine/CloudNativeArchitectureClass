@@ -21,7 +21,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<start-class>io.springbox.configserver.SpringboxConfigClientApplication</start-class>
+		<start-class>io.springbox.configclient.SpringboxConfigClientApplication</start-class>
 		<java.version>1.8</java.version>
 	</properties>
 

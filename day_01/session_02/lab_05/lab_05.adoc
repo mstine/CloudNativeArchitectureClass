@@ -1,29 +1,28 @@
 = Lab 5 - From Zero to Pushing Your First Application
 
-== Registration Steps (WIP):
+== Setup
 
-. Make sure you've created a Pivotal Web Services (PWS) account as indicated in the prerequisites.
-. Enter your username (the email address you used to register with PWS) on any unused row of the class https://docs.google.com/spreadsheets/d/1kMlV-D3pIVQfhsDDcfFXDgYRsZk7zY7i-dQy0n098_E[Google Sheet].
-. We'll run a script that gets everyone added to the appropriate space on PWS.
-. Once we've run this script, you should be able to start the lab.
-
-== Target
-
-. If you haven't already, download the latest release of the Cloud Foundry CLI from https://github.com/cloudfoundry/cli/releases for your operating system and install it.
+. If you are on a network that requires a proxy, set the proxy as an environment variable:
++
+----
+export HTTP_PROXY={HTTP_PROXY}
+----
 
 . Set the API target for the CLI:
 +
 ----
-$ cf api api.run.pivotal.io
+$ cf api {CF-API-URL} --skip-ssl-validation
 ----
 
-. Login to Pivotal Web Services:
-+
+. Your username will be first initial + lastname. Password will be provided in the class.
+. Follow the steps above for login.
+. Create your own space and target that space:
+
 ----
-$ cf login
+$ cf create-space <your_username> 
+$ cf target -s <your_username> 
 ----
-+
-Follow the prompts, choosing `oreilly-class` when prompted for an organization and `studentXX` when prompted for a space.
+
 
 == Build and Push!
 
@@ -31,6 +30,20 @@ Follow the prompts, choosing `oreilly-class` when prompted for an organization a
 +
 ----
 $ cd $COURSE_HOME/day_01/session_02/lab_05/spring-music
+----
+
+. If you are on a network that is behind an HTTP proxy, you will need to provide some proxy settings to the Gradle build tool so it can download dependencies. In your user home directory, create a directory named `.gradle` and a file named `gradle.properties` in that directory (e.g. `~/.gradle/gradle.properties` on Linux/OSX or `%USERPROFILE%\.gradle\gradle.properties` on Windows). Add lines like these to that file, with the address and credentials for your HTTP proxy: 
++
+----
+systemProp.http.proxyHost=www.example.com
+systemProp.http.proxyPort=8080
+systemProp.http.proxyUser=userid
+systemProp.http.proxyPassword=password
+
+systemProp.https.proxyHost=www.example.com
+systemProp.https.proxyPort=8080
+systemProp.https.proxyUser=userid
+systemProp.https.proxyPassword=password
 ----
 
 . Using the Gradle Wrapper, build and package the application:

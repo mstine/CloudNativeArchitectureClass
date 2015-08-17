@@ -5,6 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.2">
+<meta name="author" content="[abstract]">
 <title>Lab 21 - Creating an OAuth2 Authorization Server</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
@@ -683,13 +684,196 @@ b.conum * { color: inherit !important; }
 <body class="article">
 <div id="header">
 <h1>Lab 21 - Creating an OAuth2 Authorization Server</h1>
+<div class="details">
+<span id="author" class="author">[abstract]</span><br>
+</div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>We will now create an oAuth 2.0 authorization server. Using spring cloud security support we will see how easy it is to create a working authentication server with very little code needed</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_the_dependencies">Configuring the dependencies</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Add the following dependencies to your pom.xml file</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.security.oauth&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-security-oauth2&lt;/artifactId&gt;
+	&lt;version&gt;2.0.7.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_enabling_the_auth_server">Enabling the auth server</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Modify your <code>/src/main/java/io/pivotal/springbox/authserver/SpringboxAuthServerApplication</code> class</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>@SpringBootApplication
+@RestController
+@EnableResourceServer <b class="conum">(1)</b>
+public class SpringboxAuthServerApplication extends WebMvcConfigurerAdapter {
 
+    @RequestMapping("/user") <b class="conum">(2)</b>
+    public Object user(Principal user) {
+        OAuth2Authentication authentication = (OAuth2Authentication) user;
+        Authentication userAuthentication = authentication.getUserAuthentication();
+        return userAuthentication.getPrincipal();
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxAuthServerApplication.class, args);
+    }
+
+    @Configuration
+    @EnableAuthorizationServer <b class="conum">(3)</b>
+    protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
+
+        @Autowired
+        private AuthenticationManager authenticationManager;
+
+        @Override <b class="conum">(4)</b>
+        public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+            endpoints.authenticationManager(authenticationManager);
+        }
+
+
+
+        @Override <b class="conum">(5)</b>
+        public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+            clients.inMemory()
+                    .withClient("acme")
+                    .secret("acmesecret")
+                    .authorizedGrantTypes("authorization_code", "refresh_token",
+                            "password").scopes("openid");
+        }
+
+    }
+
+    @Configuration <b class="conum">(6)</b>
+    protected static class AuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
+
+        @Override <b class="conum">(7)</b>
+        public void init(AuthenticationManagerBuilder auth) throws Exception {
+
+            auth.inMemoryAuthentication()
+                    .withUser("mstine").password("secret").roles("USER", "ADMIN").and()
+                    .withUser("littleidea").password("secret").roles("USER", "ADMIN").and()
+                    .withUser("starbuxman").password("secret").roles("USER", "ADMIN");
+        }
+
+    }
+
+}</pre>
+</div>
+</div>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>This bootstraps the auth server by creating spring filters to handle the token credentials that are passed over requests</p>
+</li>
+<li>
+<p>An user endpoint to return the current authenticated user</p>
+</li>
+<li>
+<p>Bootstraps an authentication server that handles the oauth 2 flow, by setting proper endpoints and setting some default spring security beans</p>
+</li>
+<li>
+<p>We set the authentication manager configured on (vii) to be used by all endpoints</p>
+</li>
+<li>
+<p>Configure an in memory client details service that has a single client <code>acme</code> registered. You could use your own implementation that loads details for a database for example</p>
+</li>
+<li>
+<p>This adapter class allows customization of the authorization manager used by our app</p>
+</li>
+<li>
+<p>Configure an in memory authorization manager. You could add other Authorization managers such as JDBC or LDAP based here</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing_it_out">Testing it out</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Build the application</p>
+<div class="listingblock">
+<div class="content">
+<pre>mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>java -jar target/springbox-auth-server-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<div class="title">To test the authentication server execute a simple POST to the /uaa/oauth/token endpoint, you will need to set the following headers:</div>
+<p>+
+i) Authorization : Basic + a base64 encoded string of the clientId:clientSecret, on this example it will be acme:acmesecret
+ii) Content-Type : application/x-www-form-urlencoded
+iii) Payload: grant_type=password&amp;username=&lt;username&gt;&amp;password=&lt;password&gt;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XPOST -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "Authorization: Basic YWNtZTphY21lc2VjcmV0" \
+             http://localhost:9999/uaa/oauth/token \
+             -d "grant_type=password&amp;username=mstine&amp;password=secret"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should get back an authentication token</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>{"access_token":"661aac97-55ca-49a0-b8b6-a4a1d8cb63de","token_type":"bearer","refresh_token":"9a605803-4013-4818-ae24-22de7b399018","expires_in":43199,"scope":"openid"}</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 16:35:30 CST
+Last updated 2015-05-05 11:02:23 CDT
 </div>
 </div>
 </body>

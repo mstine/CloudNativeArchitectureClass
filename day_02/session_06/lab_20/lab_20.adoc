@@ -1,1 +1,85 @@
 = Lab 20 - Monitoring Circuit Breakers with Hystrix Dashboard
+
+[abstract]
+--
+Let's continue learning the components found in Spring Cloud to implement patterns for distributed systems.
+Now we'll monitor what's happening in our Circuit Breakers by using Netflix Hystrix Dashboard.
+
+In this lab, we'll do the following:
+
+. Run everything that we created in  link:../../session_06/lab_19/lab_19.html[Lab 19].
+. Create a Hystrix Dashboard
+. Kill both of the producers and watch the circuit open in the Dashboard.
+. Restart a producer and watch the circuit close in the Dashboard.
+--
+
+== Setup
+
+. Make sure you've completed link:../../session_06/lab_19/lab_19.html[Lab 19] and have everything still running.
+
+== Building the Hystrix Dashboard
+
+. Change to the lab directory:
++
+----
+$ cd $COURSE_HOME/day_02/session_06/lab_20/initial/springbox-hystrix-dashboard
+----
++
+and import the project (via `pom.xml`) into your IDE of choice.
+
+. Add the following dependency to `pom.xml`:
++
+----
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-hystrix-dashboard</artifactId>
+</dependency>
+----
+
+. Add a `@EnableHystrixDashboard` to the class `io.pivotal.springcloud.hystrixdashboard.HystrixDashboardApplication`.
+
+. Create the file `src/main/resources/application.yml` and into it paste the following:
++
+----
+server:
+  port: 7979
+----
+
+. Build the application:
++
+----
+$ mvn package
+----
+
+. Run the application:
++
+----
+$ java -jar target/hystrix-dashboard-0.0.1-SNAPSHOT.jar
+----
+
+. Now, access the Hystrix Dashboard at http://localhost:7979.
+Enter http://localhost:8081/hystrix.stream into the text field  and click the ``Monitor Stream.''
++
+image:../../../Common/images/fortunes_2.png[]
+
+. Using `curl`, test the consumer application several times and show that the circuit breaker is registering successful requests.
++
+image:../../../Common/images/fortunes_3.png[]
+
+== Fallback
+
+. Shut down both of the producer processes.
+
+. Using `curl`, test the consumer application and show that it is only emitting the fallback value of `42`.
+
+. You should also see the circuit breaker is registering short-circuited requests.
++
+image:../../../Common/images/fortunes_5.png[]
+
+== Recovery
+
+. Restart one of the producer processes. Wait for it to register with Eureka.
+
+. Using `curl`, test the consumer application and show that eventually recovers and starts hitting the new producer process. This can take several seconds as the Eureka and Ribbon caches repopulate.
+
+. Continue to watch the dashboard. You should also see the circuit breaker dashboard show the recovery.

@@ -131,3 +131,4 @@ As you can see, we're back down to only one instance running, and it is in fact 
 . Confirm that by again revisiting the route in the browser and checking the instance index and request counter:
 +
 image::../../../Common/images/cf-scale-boot-unscaled.png[]
+

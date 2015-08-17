@@ -2,13 +2,13 @@
 
 == Set up the Actuator
 
-. Change to the lab directory:
+. Change to the lab directory (or build off of lab_01, lab_02, or lab_03):
 +
 ----
 $ cd $COURSE_HOME/day_01/session_01/lab_04/initial/hello-spring-boot
 ----
 
-. Import the project's `pom.xml` into your editor/IDE of choice.
+. Import the project's `pom.xml` into your editor/IDE of choice if you haven't already done so in a previous lab.
 
 . To `pom.xml` add the following dependency to include the starter for Spring Boot Actuator:
 +

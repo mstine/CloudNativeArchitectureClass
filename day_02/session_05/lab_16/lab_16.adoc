@@ -10,7 +10,7 @@ In this lab, we'll do the following:
 
 . Create a Eureka server
 . Create two applications, a ``producer'' and a ``consumer,'' wire them up using Eureka, and test them.
-. Deploy the Eureka server to Pivotal Web Services
+. Deploy the Eureka server to Pivotal Cloud Foundry 
 . Update our previously developed microservices to register themselves with Eureka
 --
 
@@ -30,24 +30,24 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.0.RC3</version>
+  <version>1.0.1.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
 ----
 
-. Add the Spring Milestone repository (as Spring Cloud is still pre-GA):
+. Add the following repository to resolve the `1.0.1.RELEASE` artifacts:
 +
 ----
 <repositories>
-  <repository>
-    <id>spring-milestones</id>
-    <name>Spring Milestones</name>
-    <url>https://repo.spring.io/libs-milestone/</url>
-    <snapshots>
-      <enabled>true</enabled>
-      </snapshots>
-  </repository>
+    <repository>
+        <id>spring-release</id>
+        <name>Spring Release</name>
+        <url>https://repo.spring.io/release/</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
 </repositories>
 ----
 
@@ -142,25 +142,10 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.0.RC3</version>
+  <version>1.0.1.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
-----
-
-. Add the Spring Milestone repository (as Spring Cloud is still pre-GA):
-+
-----
-<repositories>
-  <repository>
-    <id>spring-milestones</id>
-    <name>Spring Milestones</name>
-    <url>https://repo.spring.io/libs-milestone/</url>
-    <snapshots>
-      <enabled>true</enabled>
-      </snapshots>
-  </repository>
-</repositories>
 ----
 
 . Add a dependency on `spring-cloud-starter` and `spring-cloud-starter-eureka`:
@@ -176,7 +161,7 @@ and import the project (via `pom.xml`) into your IDE of choice.
 </dependency>
 ----
 
-. In the package `io.springbox.producer`, create the class `GreetingController`.
+. In the package `io.springbox.producer`, create the class `ProducerController`.
 Into that class paste the following code:
 +
 ----
@@ -240,7 +225,7 @@ In a different terminal window, change to that directory, rebuild, and run the a
 +
 ----
 $ cd $COURSE_HOME/day_02/session_05/lab_16/initial/springbox-config-server
-$ mvn packaage
+$ mvn package
 $ java -jar target/springbox-config-server-0.0.1-SNAPSHOT.jar
 ----
 
@@ -284,25 +269,10 @@ and import the project (via `pom.xml`) into your IDE of choice.
 <parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-parent</artifactId>
-  <version>1.0.0.RC3</version>
+  <version>1.0.1.RELEASE</version>
   <relativePath/>
   <!-- lookup parent from repository -->
 </parent>
-----
-
-. Add the Spring Milestone repository (as Spring Cloud is still pre-GA):
-+
-----
-<repositories>
-  <repository>
-    <id>spring-milestones</id>
-    <name>Spring Milestones</name>
-    <url>https://repo.spring.io/libs-milestone/</url>
-    <snapshots>
-      <enabled>true</enabled>
-      </snapshots>
-  </repository>
-</repositories>
 ----
 
 . Add a dependency on `spring-cloud-starter` and `spring-cloud-starter-eureka`:
@@ -460,6 +430,14 @@ last uploaded: Thu Feb 19 07:40:21 UTC 2015
 . In a browser, visit the route assigned to your Eureka server and verify that everything is working properly:
 +
 image::../../../Common/images/eureka_1.png[]
+
+. Create a user-provided service representing the Eureka server (be sure to use the route assigned to your Eureka server!):
++
+----
+$ cf cups springbox-service-registry -p '{"uri":"http://springbox-service-registry-unmaritime-acidification.cfapps.io"}'
+Creating user provided service springbox-service-registry in org oreilly-class / space instructor as mstine@pivotal.io...
+OK
+----
 
 == Update the Microservices to Use Eureka
 

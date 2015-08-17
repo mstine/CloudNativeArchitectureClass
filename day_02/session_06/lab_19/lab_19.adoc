@@ -1,1 +1,173 @@
 = Lab 19 - Fault-Tolerance with Hystrix
+
+[abstract]
+--
+Let's continue learning the components found in Spring Cloud to implement patterns for distributed systems.
+We'll again use Spring Cloud Netflix to implement client-side load balancing with Ribbon.
+However, this time we'll add an implementation of the Circuit Breaker pattern using Netflix Hystrix.
+
+In this lab, we'll do the following:
+
+. Refactor the consumer application from link:../../session_06/lab_17/lab_17.html[Lab 17] to add a slightly different `ProducerClient` than we added in link:../../session_06/lab_18/lab_18.html[Lab 18].
+. Test the new consumer version against our local pool of producers
+. Kill one of the producers and watch the consumer failover.
+. Kill the remaining producer and watch the circuit breaker fallback behavior.
+. Restart a producer and watch the consumer recover.
+--
+
+== Setup
+
+. A completed `springbox-config-server` project has been placed in `$COURSE_HOME/day_02/session_06/lab_19/initial/springbox-config-server` for your convenience.
+In a terminal window, change to that directory, rebuild, and run the application:
++
+----
+$ cd $COURSE_HOME/day_02/session_06/lab_19/initial/springbox-config-server
+$ mvn package
+$ java -jar target/springbox-config-server-0.0.1-SNAPSHOT.jar
+----
+
+. A completed `springbox-eureka` project has been placed in `$COURSE_HOME/day_02/session_06/lab_19/initial/springbox-eureka` for your convenience.
+In a separate terminal window, change to that directory, rebuild, and run the application:
++
+----
+$ cd $COURSE_HOME/day_02/session_06/lab_19/initial/springbox-eureka
+$ mvn package
+$ java -jar target/springbox-eureka-0.0.1-SNAPSHOT.jar
+----
+
+. A completed `springbox-producer` project has been placed in `$COURSE_HOME/day_02/session_06/lab_19/initial/springbox-producer` for your convenience.
+In two separate terminal windows, change to that directory, rebuild, and run the application (on different ports):
++
+----
+$ cd $COURSE_HOME/day_02/session_06/lab_19/initial/springbox-producer
+$ mvn package
+$ SERVER_PORT=8080 java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar
+$ SERVER_PORT=8082 java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar
+----
+
+. Ensure you have two instances of the producer service registered in Eureka:
++
+image::../../../Common/images/ribbon_1.png[]
+
+== Using Hystrix
+
+. Change to the lab directory:
++
+----
+$ cd $COURSE_HOME/day_02/session_06/lab_19/initial/springbox-consumer
+----
++
+and import the project (via `pom.xml`) into your IDE of choice.
+
+. Add the following dependency to `pom.xml`:
++
+----
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-hystrix</artifactId>
+</dependency>
+----
+
+. Add a `@EnableCircuitBreaker` annotation to the class `io.springbox.consumer.SpringboxConsumerApplication`.
+
+. Add two constructors to the class `io.springbox.consumer.ProducerResponse`:
++
+----
+public ProducerResponse() {
+}
+
+public ProducerResponse(int value) {
+    this.value = value;
+}
+----
+
+. Create the class `io.springbox.consumer.ProducerClient` and into it paste the following code:
++
+----
+@Component
+public class ProducerClient {
+
+    @Autowired
+    @LoadBalanced
+    RestTemplate restTemplate;
+
+    @HystrixCommand(fallbackMethod = "getProducerFallback")
+    public ProducerResponse getValue() {
+        return restTemplate.getForObject("http://producer", ProducerResponse.class);
+    }
+
+    private ProducerResponse getProducerFallback() {
+        return new ProducerResponse(42);
+    }
+}
+----
+
+. Refactor the class `io.springbox.consumer.ConsumerController` to autowire the `ProducerClient` instead of `RestTemplate`, and then use it to obtain the `ProducerResponse`:
++
+----
+@Autowired
+ProducerClient client;
+
+@RequestMapping(value = "/", produces = "application/json")
+String consume() {
+    ProducerResponse response = client.getValue();
+    return String.format("{\"value\":%d}", response.getValue());
+}
+----
+
+. To the file `src/main/resources/application.properties` add the following:
++
+----
+producer.ribbon.ServerListRefreshInterval=5000
+----
+
+. Build the application:
++
+----
+$ mvn package
+----
+
+. Run the application:
++
+----
+$ java -jar target/springbox-consumer-0.0.1-SNAPSHOT.jar
+----
+
+. Using `curl`, test the consumer application and show that it is still receiving values from the producers.
+Also, watch the producers and observe that Ribbon is performing round robin load balancing across the two producers:
++
+----
+$ curl -i localhost:8081
+HTTP/1.1 200 OK
+Content-Length: 11
+Content-Type: application/json;charset=UTF-8
+Date: Tue, 24 Feb 2015 05:47:33 GMTServer: Apache-Coyote/1.1X-Application-Context: consumer:8081
+
+{
+  "value": 5
+}
+----
+
+== Failover
+
+. Shut down one of the two producer processes.
+
+. Using `curl`, test the consumer application and show that it is still receiving values from one of the producers.
++
+You may get the fallback value of `42` a few times due to the lag in removing the failed instance from the Ribbon cache. Eventually it will converge to hitting the only remaining healthy instance.
+
+== Fallback
+
+. Shut down the remaining producer process.
+
+. Using `curl`, test the consumer application and show that it is only emitting the fallback value of `42`.
+
+== Recovery
+
+. Restart one of the producer processes. Wait for it to register with Eureka.
+
+. Using `curl`, test the consumer application and show that eventually recovers and starts hitting the new producer process. This can take several seconds as the Eureka and Ribbon caches repopulate.
+
+== Next Steps
+
+Do not shut anything down when you complete this lab. We will add one additional component in link:../../session_06/lab_20/lab_20.html[Lab 20].

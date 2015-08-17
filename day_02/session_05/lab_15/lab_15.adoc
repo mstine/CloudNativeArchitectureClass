@@ -222,17 +222,14 @@ Ohai World!
 
 == Update the Microservices to Use the Cloud Bus
 
-. Create a http://www.cloudamqp.com/[CloudAMQP] service to back the Cloud Bus:
+. Create a Pivotal RabbitMQ service to back the Cloud Bus:
 +
 ----
-$ cf cs cloudamqp tiger springbox-cloud-bus-amqp
-Creating service springbox-cloud-bus-amqp in org oreilly-class / space instructor as mstine@pivotal.io...
+$ cf cs p-rabbitmq standard springbox-cloud-bus-amqp
+Creating service springbox-cloud-bus-amqp in org ACME / space jfullam as jfullam...
 OK
-
-Attention: The plan `tiger` of service `cloudamqp` is not free.  The instance `springbox-cloud-bus-amqp` will incur a cost.  Contact your administrator if you think this is in error.
 ----
 +
-Do not worry about the cost, as the class is sponsoring the CF organization we're using and will cover the service costs.
 
 . In your config repo, update the file `application.yml`, adding a new property:
 +

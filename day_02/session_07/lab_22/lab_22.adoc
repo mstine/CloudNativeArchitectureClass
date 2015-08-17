@@ -1,1 +1,108 @@
 = Lab 22 - Securing a Resource Server with Spring Cloud Security
+Now that we have an authorization server from lab 21, we will create a simple restful webservice and protect it using oauth tokens.
+
+== Running it
+
+. First build the project as it is from the initial folder
++
+----
+mvn package
+----
+
+. Run the app
++
+----
+java -jar target/springbox-resource-server-0.0.1-SNAPSHOT.jar
+----
+
+. Access the endpoint on your browser `http://localhost:8082/greeting` and you should receive back a simple json output
+----
+{
+content: "Hello user"
+}
+----
+ 
+== Securing it
+
+. Add the following dependencies to your pom.xml
++
+----
+        <dependency>
+            <groupId>org.springframework.security.oauth</groupId>
+            <artifactId>spring-security-oauth2</artifactId>
+            <version>2.0.7.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
+----
+
+. Modify you application.yml, it should look like this:
++
+----
+server:
+   port: 8082
+spring:
+  oauth2:
+    resource:
+      userInfoUri: http://localhost:9999/uaa/user <1>
+----
+i) Set it to the location of your Authorization Server built on lab 21. 
+
+. Modify the `SpringboxResourceServerApplication` class to enable oAuth2 
++
+----
+@SpringBootApplication
+@EnableOAuth2Resource <1>
+public class SpringboxResourceServerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication app = new SpringApplication(SpringboxResourceServerApplication.class);
+        app.run(args);
+    }
+
+
+}
+----
+i) This annotation will enable the proper Spring Security Filters to look for a token on the headers and validate that against the userInfoUri to obtain the SecurityPrincipal
+
+. Access the endpoint again at `http://locahost:8082/greeting` and you get back an unauthorized response:
+
+----
+<oauth>
+<error_description>
+Full authentication is required to access this resource
+</error_description>
+<error>unauthorized</error>
+</oauth>
+---- 
+
+== Obtain a valid token
+
+In order to access the resource now you will need a valid token from your Authorization Server. To do that execute the command:
+
+----
+curl -XPOST -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "Authorization: Basic YWNtZTphY21lc2VjcmV0" \
+             http://localhost:9999/uaa/oauth/token \
+             -d "grant_type=password&username=mstine&password=secret"
+---- 
+
+The result should be something like this:
+
+----
+{"access_token":"5d04666c-11c2-4a4c-9dae-f0def0acc9c1","token_type":"bearer","refresh_token":"361fa725-735f-4853-bb0f-5a8956a01b33","expires_in":43199,"scope":"openid"}
+----
+
+. Grab the access_token from that result and now invoke the following command to call your service, replace the Authorization header with the proper token from the previous step:
+
+----
+curl -XGET -H "Authorization: bearer 5d04666c-11c2-4a4c-9dae-f0def0acc9c1" http://localhost:8082/greeting
+----
+
+This is all that is needed to protect a resource to require oAuth2 tokens to be accessed.
