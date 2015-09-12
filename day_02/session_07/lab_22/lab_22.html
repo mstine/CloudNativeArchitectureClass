@@ -5,6 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.2">
+<meta name="author" content="Now that we have an authorization server from lab 21, we will create a simple restful webservice and protect it using oauth tokens.">
 <title>Lab 22 - Securing a Resource Server with Spring Cloud Security</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
@@ -683,13 +684,176 @@ b.conum * { color: inherit !important; }
 <body class="article">
 <div id="header">
 <h1>Lab 22 - Securing a Resource Server with Spring Cloud Security</h1>
+<div class="details">
+<span id="author" class="author">Now that we have an authorization server from lab 21, we will create a simple restful webservice and protect it using oauth tokens.</span><br>
+</div>
 </div>
 <div id="content">
+<div class="sect1">
+<h2 id="_running_it">Running it</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>First build the project as it is from the initial folder</p>
+<div class="listingblock">
+<div class="content">
+<pre>mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the app</p>
+<div class="listingblock">
+<div class="content">
+<pre>java -jar target/springbox-resource-server-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Access the endpoint on your browser <code><a href="http://localhost:8082/greeting" class="bare">http://localhost:8082/greeting</a></code> and you should receive back a simple json output</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>{
+content: "Hello user"
+}</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_securing_it">Securing it</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Add the following dependencies to your pom.xml</p>
+<div class="listingblock">
+<div class="content">
+<pre>        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.security.oauth&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-security-oauth2&lt;/artifactId&gt;
+            &lt;version&gt;2.0.7.RELEASE&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-security&lt;/artifactId&gt;
+        &lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Modify you application.yml, it should look like this:</p>
+<div class="listingblock">
+<div class="content">
+<pre>server:
+   port: 8082
+spring:
+  oauth2:
+    resource:
+      userInfoUri: http://localhost:9999/uaa/user <b class="conum">(1)</b></pre>
+</div>
+</div>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>Set it to the location of your Authorization Server built on lab 21.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Modify the <code>SpringboxResourceServerApplication</code> class to enable oAuth2</p>
+<div class="listingblock">
+<div class="content">
+<pre>@SpringBootApplication
+@EnableOAuth2Resource <b class="conum">(1)</b>
+public class SpringboxResourceServerApplication {
 
+    public static void main(String[] args) {
+        SpringApplication app = new SpringApplication(SpringboxResourceServerApplication.class);
+        app.run(args);
+    }
+
+
+}</pre>
+</div>
+</div>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>This annotation will enable the proper Spring Security Filters to look for a token on the headers and validate that against the userInfoUri to obtain the SecurityPrincipal</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Access the endpoint again at <code><a href="http://locahost:8082/greeting" class="bare">http://locahost:8082/greeting</a></code> and you get back an unauthorized response:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;oauth&gt;
+&lt;error_description&gt;
+Full authentication is required to access this resource
+&lt;/error_description&gt;
+&lt;error&gt;unauthorized&lt;/error&gt;
+&lt;/oauth&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_obtain_a_valid_token">Obtain a valid token</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In order to access the resource now you will need a valid token from your Authorization Server. To do that execute the command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XPOST -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "Authorization: Basic YWNtZTphY21lc2VjcmV0" \
+             http://localhost:9999/uaa/oauth/token \
+             -d "grant_type=password&amp;username=mstine&amp;password=secret"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The result should be something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>{"access_token":"5d04666c-11c2-4a4c-9dae-f0def0acc9c1","token_type":"bearer","refresh_token":"361fa725-735f-4853-bb0f-5a8956a01b33","expires_in":43199,"scope":"openid"}</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Grab the access_token from that result and now invoke the following command to call your service, replace the Authorization header with the proper token from the previous step:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>curl -XGET -H "Authorization: bearer 5d04666c-11c2-4a4c-9dae-f0def0acc9c1" http://localhost:8082/greeting</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is all that is needed to protect a resource to require oAuth2 tokens to be accessed.</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 16:35:45 CST
+Last updated 2015-05-05 11:02:23 CDT
 </div>
 </div>
 </body>

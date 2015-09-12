@@ -1,5 +1,5 @@
 :compat-mode:
-= Lab 11 - Build a Product Search/Details Service using PostgreSQL
+= Lab 11 - Build a Product Search/Details Service using MySQL
 
 [abstract]
 --
@@ -310,21 +310,21 @@ X-Application-Context: application
 
 == Preparing for Cloud Foundry
 
-. We want to bind to a PostgreSQL data source when running on PWS, so let's create one:
+. We want to bind to a MySQL data source when running on Cloud Foundry, so let's create one:
 +
 ----
-$ cf cs elephantsql turtle springbox-catalog-db
+$ cf cs p-mysql 100mb-dev springbox-catalog-db
 Creating service springbox-catalog-db in org oreilly-class / space instructor as mstine@pivotal.io...
 OK
 ----
 
-. Add the appropriate dependencies for PostgreSQL's JDBC driver and the Spring Cloud Connectors:
+. Add the appropriate dependencies for MySQL's JDBC driver and the Spring Cloud Connectors:
 +
 ----
 <dependency>
-  <groupId>postgresql</groupId>
-  <artifactId>postgresql</artifactId>
-  <version>9.1-901-1.jdbc4</version>
+  <groupId>org.mariadb.jdbc</groupId>
+  <artifactId>mariadb-java-client</artifactId>
+  <version>1.1.7</version>
 </dependency>
 <dependency>
   <groupId>org.springframework.cloud</groupId>
@@ -360,7 +360,7 @@ spring:
 spring:
   profiles: cloud
   jpa:
-    database: POSTGRESQL
+    database: MYSQL
 ----
 
 . Rebuild the JAR:

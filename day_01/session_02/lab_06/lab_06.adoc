@@ -4,7 +4,7 @@
 [abstract]
 --
 The _Spring Music_ application was designed to illustrate the ease with which various types of data services can be bound to and utilized by Spring applications running on Cloud Foundry.
-In this lab, we'll be binding the application to both PostgreSQL and MongoDB databases.
+In this lab, we'll be binding the application to both MySql and MongoDB databases.
 
 Cloud Foundry services are managed through two primary types of operations:
 
@@ -32,12 +32,13 @@ The first is available on any instance of Cloud Foundry: the CLI. Just type:
 $ cf marketplace
 ----
 
-and you'll get a list of services, their available plans, and descriptions. On Pivotal Web Services, the ``free'' tier of plans is normally the first one listed (e.g. `turtle` for `elephansql`).
+and you'll get a list of services, their available plans, and descriptions.
 
-The second way is specific to PWS's Application Manager UI.
-If you haven't already, login to it by visiting http://console.run.pivotal.io.
+The second way is specific to Pivotal Cloud Foundry's Application Manager UI.
+If you haven't already, login to it by visiting {CF-CONSOLE-URL}.
 
 Click on the ``Marketplace'' link:
+_The Screenshots below are from Pivotal Web Services (public managed Pivotal CF).  If you are using Pivotal Cloud Foundry, you will see something similar._
 
 image::../../../Common/images/PWS_AM_InstructorSpace.png[]
 
@@ -47,12 +48,13 @@ image::../../../Common/images/PWS_Marketplace.png[]
 
 == Creating and Binding to a Service Instance
 
-. Let's begin by creating a PostgreSQL instance provided by http://www.elephantsql.com/[ElephantSQL].
-From the CLI, let's _create_ a free ElephantSQL service instance:
+. Let's begin by creating a MySql instance provided by Pivotal.
+ 
+From the CLI, let's _create_ a p-mysql service instance:
 +
 ----
-$ cf create-service elephantsql turtle spring-music-db
-Creating service spring-music-db in org oreilly-class / space instructor as mstine@pivotal.io...
+$ cf create-service p-mysql 100mb-dev spring-music-db 
+Creating service spring-music-db in org ACME / space instructor as mstine@pivotal.io...
 OK
 ----
 
@@ -60,7 +62,7 @@ OK
 +
 ----
 $ cf bs spring-music spring-music-db
-Binding service spring-music-db to app spring-music in org oreilly-class / space instructor as mstine@pivotal.io...
+Binding service spring-music-db to app spring-music in org ACME / space instructor as mstine@pivotal.io...
 OK
 TIP: Use 'cf restage' to ensure your env variable changes take effect
 ----
@@ -79,31 +81,54 @@ The subset of the output we're interested in is located near the very top, title
 System-Provided:
 {
  "VCAP_SERVICES": { <1>
-  "elephantsql": [
+  "p-mysql": [
    {
     "credentials": {
-     "max_conns": "5",
-     "uri": "postgres://xnxzdeao:ntLT0M10gz014oXnKkkjeIqLn3Td2EgH@babar.elephantsql.com:5432/xnxzdeao" <2>
+     "hostname": "10.68.50.61",
+     "jdbcUrl": "jdbc:mysql://10.68.50.61:3306/cf_ddbe0221_d1fc_478f_b693_69279b2de702?user=mWsYAON34zbaQPAA\u0026password=CZImCZ9iSNU7HfP2",
+     "name": "cf_ddbe0221_d1fc_478f_b693_69279b2de702",
+     "password": "CZImCZ9iSNU7HfP2",
+     "port": 3306,
+     "uri": "mysql://mWsYAON34zbaQPAA:CZImCZ9iSNU7HfP2@10.68.50.61:3306/cf_ddbe0221_d1fc_478f_b693_69279b2de702?reconnect=true", <2>
+     "username": "mWsYAON34zbaQPAA"
     },
-    "label": "elephantsql",
+    "label": "p-mysql",
     "name": "spring-music-db",
-    "plan": "turtle",
+    "plan": "100mb-dev",
     "tags": [
-     "Data Stores",
-     "Cloud Databases",
-     "Developer Tools",
-     "Data Store",
-     "postgresql",
-     "relational",
-     "New Product"
+     "mysql",
+     "relational"
     ]
    }
   ]
  }
 }
+
+{
+ "VCAP_APPLICATION": {
+  "application_name": "spring-music",
+  "application_uris": [
+   "spring-music-unbragging-pourparler.pcf2.fe.gopivotal.com"
+  ],
+  "application_version": "e3fa423d-69ad-41cb-bd17-0e88427dfe4c",
+  "limits": {
+   "disk": 1024,
+   "fds": 16384,
+   "mem": 512
+  },
+  "name": "spring-music",
+  "space_id": "080ba4e6-bafc-482b-9a98-42f612eef736",
+  "space_name": "jfullam",
+  "uris": [
+   "spring-music-unbragging-pourparler.pcf2.fe.gopivotal.com"
+  ],
+  "users": null,
+  "version": "e3fa423d-69ad-41cb-bd17-0e88427dfe4c"
+ }
+}
 ----
 <1> `VCAP_SERVICES` is a special Cloud Foundry environment variable that contains a JSON document containing all of the information for any services bound to an application.
-<2> Notice here the unique URI for this instance of PostgreSQL that `spring-music` has been bound to.
+<2> Notice here the unique URI for this instance of MySql that `spring-music` has been bound to.
 ====
 
 . Now let's _restage_ the application, which cycles our application back through the staging/buildpack process before redeploying the application.footnote:[In this case, we could accomplish the same goal by only _restarting_ the application via `cf restart spring-music`.
@@ -117,35 +142,25 @@ Once the application is running again, revisit or refresh the browser tab where 
 +
 image::../../../Common/images/Spring_Music_PGSQL.png[]
 +
-As you can see from the information dialog, the application is now utilizing a PostgreSQL database via the `spring-music-db` service.
+As you can see from the information dialog, the application is now utilizing a MySql database via the `spring-music-db` service.
 
-. *(OPTIONAL STEPS)* If you have a PostgreSQL GUI tool handy (you can download a free one at http://www.pgadmin.org/download), you can also take a look at the _Spring Music_ data directly in the database.
+. *(OPTIONAL STEPS)* If you have a MySql GUI tool handy and you are using a lab environment that has the necessary network access (ask your instructor), you can inspect the music database created. Otherwise, your instructor will demo via a Pivotal VPN connection.
 
-. In pgAdmin, create a new server connection and populate the properties with values from the URI in your `VCAP_SERVICES` environment variable (remember `cf env spring-muisc`!):
-+
-image::../../../Common/images/pgadmin_props.png[]
+. In your DB tool, create a new server connection and populate the properties with values from the URI in your `VCAP_SERVICES` environment variable (remember `cf env spring-muisc`!):
 
-. Connect to the server and scroll (if necessary) until you find your specific database instance:
-+
-image::../../../Common/images/pgadmin_db_instance.png[]
+== Swapping from MySql to MongoDB
 
-. Right-click on the `album` table and choose ``View Data > View All Rows'' to see the data inserted as part of _Spring Music_'s startup process:
-+
-image::../../../Common/images/pgadmin_table.png[]
-
-== Swapping from PostgreSQL to MongoDB
-
-. Now let's bind our _Spring Music_ application to MongoDB instead of PostgreSQL. First let's create footnote:[Notice in this listing that we're typing `cf cs` rather than `cf create-service`.
+. Now let's bind our _Spring Music_ application to MongoDB instead of MySql. First let's create footnote:[Notice in this listing that we're typing `cf cs` rather than `cf create-service`.
 Most CF CLI commands have a shorthand version to save typing time.
-You can view these shorthand commands via `cf help` or `cf h` (See! More shorthand!).] a MongoDB instance from https://mongolab.com/[MongoLab]:
+You can view these shorthand commands via `cf help` or `cf h` (See! More shorthand!).] a MongoDB instance from the Pivotal Cloud Foundry marketplace:
 +
 ----
-$ cf cs mongolab sandbox spring-music-mongo
-Creating service spring-music-mongo in org oreilly-class / space instructor as mstine@pivotal.io...
+$ cf cs p-mongodb development spring-music-mongo 
+Creating service spring-music-mongo in org ACME / space instructor as mstine@pivotal.io...
 OK
 ----
 
-. Next we'll unbind our application from our PostgreSQL instance (_Spring Music_ does not support being bound to multiple datasources at the same time):
+. Next we'll unbind our application from our MySql instance (_Spring Music_ does not support being bound to multiple datasources at the same time):
 +
 ----
 $ cf us spring-music spring-music-db
@@ -176,23 +191,7 @@ image::../../../Common/images/Spring_Music_Mongo.png[]
 +
 As you can see from the information dialog, the application is now utilizing a MongoDB database via the `spring-music-mongo` service.
 
-. Let's take a direct look at the data in MongoDB by utilizing the `Manage` link in PWS App Manager:
-+
-image::../../../Common/images/PWS_Manage_Spring_Music_Mongo.png[]
-+
-This uses Cloud Foundry service SSO to pass your authentication through to MongoLab's management UI (you may be asked to authenticate again because your session may have expired with PWS's login server).
-
-. Once in MongoLab's UI, click on your deployment:
-+
-image::../../../Common/images/MongoLab_Deployment.png[]
-
-. Next, click on your `albums` collection:
-+
-image::../../../Common/images/MongoLab_Collection.png[]
-
-. Now you should be able to see the documents in your collection:
-+
-image::../../../Common/images/MongoLab_Document.png[]
+. *(OPTIONAL)* Similar to the steps to view the relational data in another DB tool, a MongoDB client tool can be used to inspect the MongoDB instance.  Your instructor can demo this if you do not have access to the tool and / or the appropriate network access to the MongoDB instance.
 
 == Clean Up
 

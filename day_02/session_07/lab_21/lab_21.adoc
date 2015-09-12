@@ -1,1 +1,128 @@
 = Lab 21 - Creating an OAuth2 Authorization Server
+[abstract]
+
+--
+We will now create an oAuth 2.0 authorization server. Using spring cloud security support we will see how easy it is to create a working authentication server with very little code needed
+--
+
+
+
+== Configuring the dependencies
+. Add the following dependencies to your pom.xml file
++
+----
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<dependency>
+	<groupId>org.springframework.security.oauth</groupId>
+	<artifactId>spring-security-oauth2</artifactId>
+	<version>2.0.7.RELEASE</version>
+</dependency>
+----
+
+
+== Enabling the auth server
+
+. Modify your `/src/main/java/io/pivotal/springbox/authserver/SpringboxAuthServerApplication` class
+[source, java]
+----
+@SpringBootApplication
+@RestController
+@EnableResourceServer <1>
+public class SpringboxAuthServerApplication extends WebMvcConfigurerAdapter {
+
+    @RequestMapping("/user") <2>
+    public Object user(Principal user) {
+        OAuth2Authentication authentication = (OAuth2Authentication) user;
+        Authentication userAuthentication = authentication.getUserAuthentication();
+        return userAuthentication.getPrincipal();
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringboxAuthServerApplication.class, args);
+    }
+
+    @Configuration
+    @EnableAuthorizationServer <3>
+    protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
+
+        @Autowired
+        private AuthenticationManager authenticationManager;
+
+        @Override <4>
+        public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+            endpoints.authenticationManager(authenticationManager);
+        }
+
+
+
+        @Override <5>
+        public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+            clients.inMemory()
+                    .withClient("acme")
+                    .secret("acmesecret")
+                    .authorizedGrantTypes("authorization_code", "refresh_token",
+                            "password").scopes("openid");
+        }
+
+    }
+
+    @Configuration <6>
+    protected static class AuthenticationManagerConfiguration extends GlobalAuthenticationConfigurerAdapter {
+
+        @Override <7>
+        public void init(AuthenticationManagerBuilder auth) throws Exception {
+
+            auth.inMemoryAuthentication()
+                    .withUser("mstine").password("secret").roles("USER", "ADMIN").and()
+                    .withUser("littleidea").password("secret").roles("USER", "ADMIN").and()
+                    .withUser("starbuxman").password("secret").roles("USER", "ADMIN");
+        }
+
+    }
+
+}
+----
+i) This bootstraps the auth server by creating spring filters to handle the token credentials that are passed over requests
+ii) An user endpoint to return the current authenticated user
+iii) Bootstraps an authentication server that handles the oauth 2 flow, by setting proper endpoints and setting some default spring security beans
+iv) We set the authentication manager configured on (vii) to be used by all endpoints
+v) Configure an in memory client details service that has a single client `acme` registered. You could use your own implementation that loads details for a database for example
+vi) This adapter class allows customization of the authorization manager used by our app
+vii) Configure an in memory authorization manager. You could add other Authorization managers such as JDBC or LDAP based here
+
+
+== Testing it out
+
+. Build the application
++
+----
+mvn package
+----
+
+. Run the application:
+----
+java -jar target/springbox-auth-server-0.0.1-SNAPSHOT.jar
+----
+
+
+.To test the authentication server execute a simple POST to the /uaa/oauth/token endpoint, you will need to set the following headers:
++
+i) Authorization : Basic + a base64 encoded string of the clientId:clientSecret, on this example it will be acme:acmesecret
+ii) Content-Type : application/x-www-form-urlencoded
+iii) Payload: grant_type=password&username=<username>&password=<password>
+  
+----
+curl -XPOST -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "Authorization: Basic YWNtZTphY21lc2VjcmV0" \
+             http://localhost:9999/uaa/oauth/token \ 
+             -d "grant_type=password&username=mstine&password=secret"
+----
+
+You should get back an authentication token
+
+----
+{"access_token":"661aac97-55ca-49a0-b8b6-a4a1d8cb63de","token_type":"bearer","refresh_token":"9a605803-4013-4818-ae24-22de7b399018","expires_in":43199,"scope":"openid"}
+----

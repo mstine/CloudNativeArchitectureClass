@@ -685,11 +685,278 @@ b.conum * { color: inherit !important; }
 <h1>Lab 19 - Fault-Tolerance with Hystrix</h1>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="quoteblock abstract">
+<blockquote>
+<div class="paragraph">
+<p>Let&#8217;s continue learning the components found in Spring Cloud to implement patterns for distributed systems.
+We&#8217;ll again use Spring Cloud Netflix to implement client-side load balancing with Ribbon.
+However, this time we&#8217;ll add an implementation of the Circuit Breaker pattern using Netflix Hystrix.</p>
+</div>
+<div class="paragraph">
+<p>In this lab, we&#8217;ll do the following:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Refactor the consumer application from <a href="../../session_06/lab_17/lab_17.html">Lab 17</a> to add a slightly different <code>ProducerClient</code> than we added in <a href="../../session_06/lab_18/lab_18.html">Lab 18</a>.</p>
+</li>
+<li>
+<p>Test the new consumer version against our local pool of producers</p>
+</li>
+<li>
+<p>Kill one of the producers and watch the consumer failover.</p>
+</li>
+<li>
+<p>Kill the remaining producer and watch the circuit breaker fallback behavior.</p>
+</li>
+<li>
+<p>Restart a producer and watch the consumer recover.</p>
+</li>
+</ol>
+</div>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_setup">Setup</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>A completed <code>springbox-config-server</code> project has been placed in <code>$COURSE_HOME/day_02/session_06/lab_19/initial/springbox-config-server</code> for your convenience.
+In a terminal window, change to that directory, rebuild, and run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_02/session_06/lab_19/initial/springbox-config-server
+$ mvn package
+$ java -jar target/springbox-config-server-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>A completed <code>springbox-eureka</code> project has been placed in <code>$COURSE_HOME/day_02/session_06/lab_19/initial/springbox-eureka</code> for your convenience.
+In a separate terminal window, change to that directory, rebuild, and run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_02/session_06/lab_19/initial/springbox-eureka
+$ mvn package
+$ java -jar target/springbox-eureka-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>A completed <code>springbox-producer</code> project has been placed in <code>$COURSE_HOME/day_02/session_06/lab_19/initial/springbox-producer</code> for your convenience.
+In two separate terminal windows, change to that directory, rebuild, and run the application (on different ports):</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_02/session_06/lab_19/initial/springbox-producer
+$ mvn package
+$ SERVER_PORT=8080 java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar
+$ SERVER_PORT=8082 java -jar target/springbox-producer-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Ensure you have two instances of the producer service registered in Eureka:</p>
+<div class="imageblock">
+<div class="content">
+<img src="../../../Common/images/ribbon_1.png" alt="ribbon 1">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_hystrix">Using Hystrix</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Change to the lab directory:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cd $COURSE_HOME/day_02/session_06/lab_19/initial/springbox-consumer</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and import the project (via <code>pom.xml</code>) into your IDE of choice.</p>
+</div>
+</li>
+<li>
+<p>Add the following dependency to <code>pom.xml</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-cloud-starter-hystrix&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add a <code>@EnableCircuitBreaker</code> annotation to the class <code>io.springbox.consumer.SpringboxConsumerApplication</code>.</p>
+</li>
+<li>
+<p>Add two constructors to the class <code>io.springbox.consumer.ProducerResponse</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>public ProducerResponse() {
+}
 
+public ProducerResponse(int value) {
+    this.value = value;
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the class <code>io.springbox.consumer.ProducerClient</code> and into it paste the following code:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@Component
+public class ProducerClient {
+
+    @Autowired
+    @LoadBalanced
+    RestTemplate restTemplate;
+
+    @HystrixCommand(fallbackMethod = "getProducerFallback")
+    public ProducerResponse getValue() {
+        return restTemplate.getForObject("http://producer", ProducerResponse.class);
+    }
+
+    private ProducerResponse getProducerFallback() {
+        return new ProducerResponse(42);
+    }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Refactor the class <code>io.springbox.consumer.ConsumerController</code> to autowire the <code>ProducerClient</code> instead of <code>RestTemplate</code>, and then use it to obtain the <code>ProducerResponse</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>@Autowired
+ProducerClient client;
+
+@RequestMapping(value = "/", produces = "application/json")
+String consume() {
+    ProducerResponse response = client.getValue();
+    return String.format("{\"value\":%d}", response.getValue());
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>To the file <code>src/main/resources/application.properties</code> add the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre>producer.ribbon.ServerListRefreshInterval=5000</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ mvn package</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the application:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar target/springbox-consumer-0.0.1-SNAPSHOT.jar</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using <code>curl</code>, test the consumer application and show that it is still receiving values from the producers.
+Also, watch the producers and observe that Ribbon is performing round robin load balancing across the two producers:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i localhost:8081
+HTTP/1.1 200 OK
+Content-Length: 11
+Content-Type: application/json;charset=UTF-8
+Date: Tue, 24 Feb 2015 05:47:33 GMTServer: Apache-Coyote/1.1X-Application-Context: consumer:8081
+
+{
+  "value": 5
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_failover">Failover</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Shut down one of the two producer processes.</p>
+</li>
+<li>
+<p>Using <code>curl</code>, test the consumer application and show that it is still receiving values from one of the producers.</p>
+<div class="paragraph">
+<p>You may get the fallback value of <code>42</code> a few times due to the lag in removing the failed instance from the Ribbon cache. Eventually it will converge to hitting the only remaining healthy instance.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_fallback">Fallback</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Shut down the remaining producer process.</p>
+</li>
+<li>
+<p>Using <code>curl</code>, test the consumer application and show that it is only emitting the fallback value of <code>42</code>.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_recovery">Recovery</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Restart one of the producer processes. Wait for it to register with Eureka.</p>
+</li>
+<li>
+<p>Using <code>curl</code>, test the consumer application and show that eventually recovers and starts hitting the new producer process. This can take several seconds as the Eureka and Ribbon caches repopulate.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_next_steps">Next Steps</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Do not shut anything down when you complete this lab. We will add one additional component in <a href="../../session_06/lab_20/lab_20.html">Lab 20</a>.</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-02-11 16:34:52 CST
+Last updated 2015-05-05 09:26:47 CDT
 </div>
 </div>
 </body>
