@@ -559,3 +559,9 @@ X-Cf-Requestid: 3e9bcafd-e4cc-4047-7355-bad9c84b3b4e
     }
 ]
 ----
+
+. Windows users
++
+----
+cf cups spring-recommendations-db -p '{\"neo4jUri\":\"http://<username>:<password>@<host>\"}'
+----
